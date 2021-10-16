@@ -28,6 +28,7 @@ This project exposes an MQTT API that should manage/observe a heating system.
 Alternatively, if you have [nix](https://github.com/NixOS/nix) installed there's already a `shell.nix` in the repo, you can use that and you're all set(with this you can also use `scripts/linux-build.sh`).
 
 # Contributing
+- Start a new branch when you want to work on something, and give that branch a descriptive name
 - Just make sure you format your code correctly(you can use `clang-format` and `cmake-format` to verify that you code is formatted correctly)
 - Always have an issue to link your commits to
 - The first line of every commit should be concise and descriptive, with a reference to the issue it's linked to, after that you can optionally have a blank line followed by as much text as you need. Try not to exceed more than 80-100 columns in your commits, example:
@@ -36,3 +37,4 @@ Alternatively, if you have [nix](https://github.com/NixOS/nix) installed there's
 
   Whatever...
   ```
+- Make a PR and link your PR to the appropiate issue
