@@ -44,6 +44,8 @@ Se pot vedea si la issues.
 ![Axa prioritati](./media/axa-prioritati.png)
 
 # Setting up a development environment
+
+## For the server
 - Clone this repo including the `vcpkg` submodule:
   ```
   git clone --recurse-submodules https://github.com/AlexandruIca/mqtt-heating-system.git
@@ -63,15 +65,24 @@ Se pot vedea si la issues.
 
   cd build/
   cmake --build .
-  # You can also copy the `compile_commands.json` file to your root dir(to be used by C++ tools)
+  # You can also copy the `compile_commands.json` file to your root dir(to be used by clang tools)
   #
   # After everything succeeds you have you executable in `build/src/`
   ```
 Alternatively, if you have [nix](https://github.com/NixOS/nix) installed there's already a `shell.nix` in the repo, you can use that and you're all set(with this you can also use `scripts/linux-build.sh`).
 
+## For the client
+- Install [poetry](https://python-poetry.org/)
+- Run `poetry install`
+
+#### Running the client
+```sh
+./scripts/run-client.sh
+```
+
 # Contributing
 - Start a new branch when you want to work on something, and give that branch a descriptive name
-- Just make sure you format your code correctly(you can use `clang-format` and `cmake-format` to verify that you code is formatted correctly)
+- Just make sure you format your code correctly(you can use `clang-format` and `cmake-format` to verify that you code is formatted correctly for the server, for the client you can run `scripts/check_autopep8.sh` or `scripts/apply_autopep8.sh`)
 - Always have an issue to link your commits to
 - The first line of every commit should be concise and descriptive, with a reference to the issue it's linked to, after that you can optionally have a blank line followed by as much text as you need. Try not to exceed more than 80-100 columns in your commits, example:
   ```
