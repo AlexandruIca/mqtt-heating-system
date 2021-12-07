@@ -4,14 +4,15 @@ in pkgs.mkShell {
     name = "cpp-environment";
     buildInputs = [
         pkgs.gcc11
-	pkgs.ninja
-	pkgs.gnumake
-	pkgs.cmake
-	pkgs.cmake-format
-	pkgs.clang-tools
-	pkgs.ccache
-	pkgs.doxygen
-	pkgs.python39
+        pkgs.ninja
+        pkgs.gnumake
+        pkgs.cmake
+        pkgs.cmake-format
+        pkgs.clang-tools
+        pkgs.ccache
+        pkgs.doxygen
+        pkgs.python39
+        pkgs.poetry
     ];
     shellHook = ''source ~/.bashrc'';
 }
