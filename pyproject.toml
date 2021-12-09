@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "client"
+name = "server"
 version = "0.1.0"
 description = "A simple MQTT client for our heating system"
 authors = ["Alexandru Ică", "Gherghina Roxana-Ioana", "Arsene Marinel", "Cioarec George", "Tudose Mihai Cristian"]
