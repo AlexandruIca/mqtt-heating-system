@@ -13,6 +13,7 @@ in pkgs.mkShell {
         pkgs.doxygen
         pkgs.python39
         pkgs.poetry
+        pkgs.mosquitto
     ];
     shellHook = ''source ~/.bashrc'';
 }
