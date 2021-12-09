@@ -59,6 +59,13 @@ Then:
 ./scripts/run-server.sh
 ```
 
+## Running tests
+All tests go into the `tests/` directory, if you want to run any of them you can run:
+```sh
+poetry run python whatever_test.py
+```
+... after first starting mosquitto and the server.
+
 # Contributing
 - Start a new branch when you want to work on something, and give that branch a descriptive name
 - Just make sure you format your code correctly(you can use `clang-format` and `cmake-format` to verify that you code is formatted correctly for the server, for the client you can run `scripts/check_autopep8.sh` or `scripts/apply_autopep8.sh`)
