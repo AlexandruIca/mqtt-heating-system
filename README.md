@@ -46,38 +46,17 @@ Se pot vedea si la issues.
 # Setting up a development environment
 
 ## For the server
-- Clone this repo including the `vcpkg` submodule:
-  ```
-  git clone --recurse-submodules https://github.com/AlexandruIca/mqtt-heating-system.git
-  ```
-- Build `vcpkg`:
-  ```sh
-  cd vcpkg/
-  ./bootstrap-vcpkg.sh
-  ```
-- Make sure you have [CMake](https://cmake.org/) installed
-- Run:
-  ```sh
-  # Might take some time when you first running, it will install all the dependencies
-  cmake -B build/ \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake . \
-
-  cd build/
-  cmake --build .
-  # You can also copy the `compile_commands.json` file to your root dir(to be used by clang tools)
-  #
-  # After everything succeeds you have you executable in `build/src/`
-  ```
-Alternatively, if you have [nix](https://github.com/NixOS/nix) installed there's already a `shell.nix` in the repo, you can use that and you're all set(with this you can also use `scripts/linux-build.sh`).
-
-## For the client
-- Install [poetry](https://python-poetry.org/)
+- Install [poetry](https://python-poetry.org/) and [mosquitto](https://mosquitto.org/)
 - Run `poetry install`
 
-#### Running the client
+#### Running the server
+First start `moquitto`:
 ```sh
-./scripts/run-client.sh
+mosquitto
+```
+Then:
+```sh
+./scripts/run-server.sh
 ```
 
 # Contributing
