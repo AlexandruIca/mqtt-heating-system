@@ -4,7 +4,8 @@ from common import *
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')
-    client.publish(POWER_TOPIC, payload='on')
+    (topic, payload) = request_to_payload(Request.POWER_ON)
+    client.publish(topic, payload)
 
 
 def on_message(client, userdata, msg):

@@ -1,6 +1,8 @@
 import paho.mqtt.client as mqtt
 from common import *
 
+state = State()
+
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')
@@ -8,10 +10,8 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    payload = msg.payload.decode('ASCII')
-
-    if msg.topic == POWER_TOPIC:
-        print(f'Power request: {payload}')
+    req = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
+    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
 
 
 client = mqtt.Client()
