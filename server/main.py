@@ -1,14 +1,18 @@
 import paho.mqtt.client as mqtt
+from common import *
 
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')
     # client.subscribe("$SYS/#")
-    client.subscribe("power/#")
+    client.subscribe(f'{POWER_TOPIC}/#')
 
 
 def on_message(client, userdata, msg):
-    print(f'Received PUBLISH: topic={msg.topic}, payload: {msg.payload}')
+    payload = msg.payload.decode('ASCII')
+
+    if msg.topic == POWER_TOPIC:
+        print(f'Power request: {payload}')
 
 
 client = mqtt.Client()
