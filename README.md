@@ -44,34 +44,31 @@ Se pot vedea si la issues.
 ![Axa prioritati](./media/axa-prioritati.png)
 
 # Setting up a development environment
-- Clone this repo including the `vcpkg` submodule:
-  ```
-  git clone --recurse-submodules https://github.com/AlexandruIca/mqtt-heating-system.git
-  ```
-- Build `vcpkg`:
-  ```sh
-  cd vcpkg/
-  ./bootstrap-vcpkg.sh
-  ```
-- Make sure you have [CMake](https://cmake.org/) installed
-- Run:
-  ```sh
-  # Might take some time when you first running, it will install all the dependencies
-  cmake -B build/ \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake . \
 
-  cd build/
-  cmake --build .
-  # You can also copy the `compile_commands.json` file to your root dir(to be used by C++ tools)
-  #
-  # After everything succeeds you have you executable in `build/src/`
-  ```
-Alternatively, if you have [nix](https://github.com/NixOS/nix) installed there's already a `shell.nix` in the repo, you can use that and you're all set(with this you can also use `scripts/linux-build.sh`).
+## For the server
+- Install [poetry](https://python-poetry.org/) and [mosquitto](https://mosquitto.org/)
+- Run `poetry install`
+
+#### Running the server
+First start `moquitto`:
+```sh
+mosquitto
+```
+Then:
+```sh
+./scripts/run-server.sh
+```
+
+## Running tests
+All tests go into the `tests/` directory, if you want to run any of them you can run:
+```sh
+poetry run python whatever_test.py
+```
+... after first starting mosquitto and the server.
 
 # Contributing
 - Start a new branch when you want to work on something, and give that branch a descriptive name
-- Just make sure you format your code correctly(you can use `clang-format` and `cmake-format` to verify that you code is formatted correctly)
+- Just make sure you format your code correctly(you can use `clang-format` and `cmake-format` to verify that you code is formatted correctly for the server, for the client you can run `scripts/check_autopep8.sh` or `scripts/apply_autopep8.sh`)
 - Always have an issue to link your commits to
 - The first line of every commit should be concise and descriptive, with a reference to the issue it's linked to, after that you can optionally have a blank line followed by as much text as you need. Try not to exceed more than 80-100 columns in your commits, example:
   ```
