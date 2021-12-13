@@ -5,7 +5,7 @@ description = "A simple MQTT client for our heating system"
 authors = ["Alexandru Ică", "Gherghina Roxana-Ioana", "Arsene Marinel", "Cioarec George", "Tudose Mihai Cristian"]
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.8"
 paho-mqtt = ">=1.6.1"
 flask = ">=2.0.0"
 
