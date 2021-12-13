@@ -1,18 +1,17 @@
 import paho.mqtt.client as mqtt
 from common import *
 
-state = State()
-
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')
-    client.subscribe(f'{POWER_TOPIC}/#')
-    client.subscribe(f'{TEMP_TOPIC}/#')
+    (topic, payload) = request_to_payload(Request.TEMPERATURE_UP)
+    client.publish(topic, payload)
+    (topic, payload) = request_to_payload(Request.TEMPERATURE_DOWN)
+    client.publish(topic, payload)
 
 
 def on_message(client, userdata, msg):
-    req = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
-    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
+    print(f'Received PUBLISH: topic={msg.topic}, payload: {msg.payload}')
 
 
 client = mqtt.Client()
