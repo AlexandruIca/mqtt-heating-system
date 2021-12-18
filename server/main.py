@@ -1,8 +1,10 @@
 import paho.mqtt.client as mqtt
 from common import *
 
-state = State()
 
+def on_error(topic, payload):
+    print("on_error called in main!!! Something went wrong!")
+    
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')
@@ -20,5 +22,5 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 client.connect(HOST, PORT, KEEPALIVE)
-
+state = State(client, on_error)
 client.loop_forever()
