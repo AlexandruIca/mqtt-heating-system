@@ -10,7 +10,7 @@ def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')
     client.subscribe(f'{POWER_TOPIC}/#')
     client.subscribe(f'{TEMP_TOPIC}/#')
-    client.subscribe(f'{STATISTICS_TOPIC}/#')
+    client.subscribe(f'{STATISTICS_GET_TOPIC}/#')
 
 
 def on_message(client, userdata, msg):

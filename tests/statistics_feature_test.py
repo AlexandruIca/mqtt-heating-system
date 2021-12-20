@@ -5,8 +5,10 @@ from common import *
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')    
     client.subscribe(f'{WARNINGS_TOPIC}/#')
-    client.subscribe(f'{STATISTICS_TOPIC}/#')
+    client.subscribe(f'{STATISTICS_SET_TOPIC}/#')
     (topic, payload) = request_to_payload(Request.WATER_STATISTICS)
+    client.publish(topic, payload)
+    (topic, payload) = request_to_payload(Request.GAS_STATISTICS)
     client.publish(topic, payload)
 
 
