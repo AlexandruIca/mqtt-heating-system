@@ -4,7 +4,7 @@ from common import *
 
 def on_error(topic, payload):
     print("on_error called in main!!! Something went wrong!")
-    
+
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result: {rc}')

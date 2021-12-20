@@ -23,18 +23,22 @@ def on_power_request(state, status, f):
     state.powered_on = status
     f()
 
+
 def on_change_temperature_request(state, f, sign, how_much):
     if sign == '+':
         if state.temperature + how_much > 30:
-            state.client.publish(f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "High Temperature Reached")
-        else: 
+            state.client.publish(
+                f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "High Temperature Reached")
+        else:
             state.temperature += how_much
     elif sign == '-':
         if state.temperature - how_much < 18:
-            state.client.publish(f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "Minimum Temperature Reached")
+            state.client.publish(
+                f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "Minimum Temperature Reached")
         else:
             state.temperature -= how_much
     f()
+
 
 request_map = {
     Request.INVALID: lambda _1, _2, f: f(),
@@ -65,7 +69,7 @@ def payload_to_request(topic: str, payload: str):
         return Request.INVALID
 
 
-def request_to_payload(req: Request, payload = None):
+def request_to_payload(req: Request, payload=None):
     if req == Request.POWER_ON:
         return (POWER_TOPIC, 'on')
     elif req == Request.POWER_OFF:
@@ -85,7 +89,7 @@ def default_callback():
 class State:
     def __init__(self, client, on_error):
         self.powered_on = False
-        self.temperature = 20 
+        self.temperature = 20
         self.client = client
         self.on_error = on_error
 
