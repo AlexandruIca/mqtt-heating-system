@@ -9,6 +9,10 @@ TEMP_TOPIC: str = 'temperature'
 WARNINGS_TOPIC: str = 'warning'
 TEMP_WARNINGS_SUBTOPIC: str = 'temperature'
 WATER_TEMP_TOPIC: str = 'water_temperature'
+STATISTICS_GET_TOPIC: str = 'statistics_get'
+STATISTICS_SET_TOPIC: str = 'statistics_set'
+WATER_USAGE_SUBTOPIC: str = 'water'
+GAS_USAGE_SUBTOPIC: str = 'gas'
 
 
 class Request(Enum):
@@ -18,8 +22,10 @@ class Request(Enum):
     TEMPERATURE_UP = 3
     TEMPERATURE_DOWN = 4
     WARNING = 5
-    WATER_TEMPERATURE_UP = 5
-    WATER_TEMPERATURE_DOWN = 6
+    WATER_TEMPERATURE_UP = 6
+    WATER_TEMPERATURE_DOWN = 7
+    WATER_STATISTICS = 8
+    GAS_STATISTICS = 9
 
 
 def on_power_request(state, status, f):
@@ -51,6 +57,16 @@ def on_change_water_temperature_request(state, f, sign, how_much):
     f()
 
 
+def on_statistics(state, f, stat_type):
+    if stat_type == 'water':
+        state.client.publish(
+            f'{STATISTICS_SET_TOPIC}/{WATER_USAGE_SUBTOPIC}', str(state.water_usage))
+    elif stat_type == 'gas':
+        state.client.publish(
+            f'{STATISTICS_SET_TOPIC}/{GAS_USAGE_SUBTOPIC}', str(state.gas_usage))
+    f()
+
+
 request_map = {
     Request.INVALID: lambda _1, _2, f: f(),
     Request.POWER_ON: lambda state, _, f: on_power_request(state, True, f),
@@ -60,6 +76,8 @@ request_map = {
     Request.WARNING: lambda state, payload, f: state.on_error(topic, payload),
     Request.WATER_TEMPERATURE_UP: lambda state, _, f: on_change_water_temperature_request(state, f, '+', .5),
     Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', -.5),
+    Request.WATER_STATISTICS: lambda state, _, f: on_statistics(state, f, 'water'),
+    Request.GAS_STATISTICS: lambda state, _, f: on_statistics(state, f, 'gas'),
 }
 
 
@@ -83,6 +101,10 @@ def payload_to_request(topic: str, payload: str):
             return Request.WATER_TEMPERATURE_UP
         elif payload == 'down':
             return Request.WATER_TEMPERATURE_DOWN
+    elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{WATER_USAGE_SUBTOPIC}'):
+        return Request.WATER_STATISTICS
+    elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}'):
+        return Request.GAS_STATISTICS
     else:
         return Request.INVALID
 
@@ -102,6 +124,10 @@ def request_to_payload(req: Request, payload=None):
         return (WATER_TEMP_TOPIC, 'up')
     elif req == Request.WATER_TEMPERATURE_DOWN:
         return (WATER_TEMP_TOPIC, 'down')
+    elif req == Request.WATER_STATISTICS:
+        return (f'{STATISTICS_GET_TOPIC}/{WATER_USAGE_SUBTOPIC}', payload)
+    elif req == Request.GAS_STATISTICS:
+        return (f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}', payload)
 
 
 def default_callback():
@@ -112,11 +138,12 @@ class State:
     def __init__(self, client, on_error):
         self.powered_on = False
         self.temperature = 20
+        self.water_temperature = 20
         self.client = client
         self.on_error = on_error
-        self.temperature = 20
-        self.water_temperature = 20
+        # cata apa a consumat in ultimele x luni
+        self.water_usage = [10, 50, 32, 24]
+        self.gas_usage = [5, 6, 7, 8]
 
     def process_request(self, req: Request, callback=default_callback, payload=None):
         request_map[req](self, payload, callback)
-        print(self.temperature)
