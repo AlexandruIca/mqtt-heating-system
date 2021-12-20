@@ -70,6 +70,18 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 
 [[package]]
+name = "flask-mqtt"
+version = "1.1.1"
+description = "Flask extension for the MQTT protocol"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Flask = "*"
+paho-mqtt = "*"
+
+[[package]]
 name = "itsdangerous"
 version = "2.0.1"
 description = "Safely pass data to untrusted environments and back."
@@ -218,8 +230,8 @@ watchdog = ["watchdog"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.9"
-content-hash = "26242fddd91c1c7ca5172517cf4f5138e4ffbded7343a4e063cbdcc84656ba26"
+python-versions = ">=3.8"
+content-hash = "9a96ce03b7fae67422d5c5db4eee41bef721dc33502d1e66dfe0dee009526eda"
 
 [metadata.files]
 atomicwrites = [
@@ -245,6 +257,9 @@ colorama = [
 flask = [
     {file = "Flask-2.0.2-py3-none-any.whl", hash = "sha256:cb90f62f1d8e4dc4621f52106613488b5ba826b2e1e10a33eac92f723093ab6a"},
     {file = "Flask-2.0.2.tar.gz", hash = "sha256:7b2fb8e934ddd50731893bdcdb00fc8c0315916f9fcd50d22c7cc1a95ab634e2"},
+]
+flask-mqtt = [
+    {file = "Flask-MQTT-1.1.1.tar.gz", hash = "sha256:6d37c5ebb8e180f6aaa409d776a04f6dcf2fcd61cc22d67341bc146db36641e0"},
 ]
 itsdangerous = [
     {file = "itsdangerous-2.0.1-py3-none-any.whl", hash = "sha256:5174094b9637652bdb841a3029700391451bd092ba3db90600dea710ba28e97c"},
