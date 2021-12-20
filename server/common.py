@@ -8,6 +8,7 @@ POWER_TOPIC: str = 'power'
 TEMP_TOPIC: str = 'temperature'
 WARNINGS_TOPIC: str = 'warning'
 TEMP_WARNINGS_SUBTOPIC: str = 'temperature'
+WATER_TEMP_TOPIC: str = 'water_temperature'
 
 
 class Request(Enum):
@@ -17,6 +18,8 @@ class Request(Enum):
     TEMPERATURE_UP = 3
     TEMPERATURE_DOWN = 4
     WARNING = 5
+    WATER_TEMPERATURE_UP = 5
+    WATER_TEMPERATURE_DOWN = 6
 
 
 def on_power_request(state, status, f):
@@ -40,6 +43,14 @@ def on_change_temperature_request(state, f, sign, how_much):
     f()
 
 
+def on_change_water_temperature_request(state, f, sign, how_much):
+    if sign == '+':
+        state.water_temperature += how_much
+    elif sign == '-':
+        state.water_temperature -= how_much
+    f()
+
+
 request_map = {
     Request.INVALID: lambda _1, _2, f: f(),
     Request.POWER_ON: lambda state, _, f: on_power_request(state, True, f),
@@ -47,6 +58,8 @@ request_map = {
     Request.TEMPERATURE_UP: lambda state, _, f: on_change_temperature_request(state, f, '+', 0.5),
     Request.TEMPERATURE_DOWN: lambda state, _, f: on_change_temperature_request(state, f, '-', 0.5),
     Request.WARNING: lambda state, payload, f: state.on_error(topic, payload),
+    Request.WATER_TEMPERATURE_UP: lambda state, _, f: on_change_water_temperature_request(state, f, '+', .5),
+    Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', -.5),
 }
 
 
@@ -65,6 +78,11 @@ def payload_to_request(topic: str, payload: str):
             return Request.TEMPERATURE_DOWN
     elif topic.startswith(WARNINGS_TOPIC):
         return Request.WARNING
+    elif topic == WATER_TEMP_TOPIC:
+        if payload == 'up':
+            return Request.WATER_TEMPERATURE_UP
+        elif payload == 'down':
+            return Request.WATER_TEMPERATURE_DOWN
     else:
         return Request.INVALID
 
@@ -80,6 +98,10 @@ def request_to_payload(req: Request, payload=None):
         return (TEMP_TOPIC, 'down')
     elif req == Request.WARNING:
         return (WARNINGS_TOPIC, payload)
+    elif req == Request.WATER_TEMPERATURE_UP:
+        return (WATER_TEMP_TOPIC, 'up')
+    elif req == Request.WATER_TEMPERATURE_DOWN:
+        return (WATER_TEMP_TOPIC, 'down')
 
 
 def default_callback():
@@ -92,6 +114,8 @@ class State:
         self.temperature = 20
         self.client = client
         self.on_error = on_error
+        self.temperature = 20
+        self.water_temperature = 20
 
     def process_request(self, req: Request, callback=default_callback, payload=None):
         request_map[req](self, payload, callback)
