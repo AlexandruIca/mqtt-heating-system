@@ -31,5 +31,22 @@ def on_message(client, userdata, msg):
     state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
 
 
+@app.route('/')
+def index():
+    return "<p>Hello, World!</p>"
+
+
 state = State(mqtt, on_error)
+
+
+@app.route('/power/<string:kind>')
+def power_on(kind):
+    if kind != 'on' and kind != 'off':
+        return "<p>Invalid URL, expected /power/on or /power/off</p>"
+
+    req = Request.POWER_ON if kind == 'on' else Request.POWER_OFF
+    state.process_request(req, callback=lambda: print('Power on from HTTP!'))
+    return f"<p>Powered {kind}: {state.powered_on}</p>"
+
+
 app.run()
