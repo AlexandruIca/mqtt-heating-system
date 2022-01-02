@@ -1,6 +1,6 @@
 #import paho.mqtt.client as mqtt
 from common import *
-from flask import Flask
+from flask import Flask, redirect, url_for, render_template
 from flask_mqtt import Mqtt
 
 
@@ -25,19 +25,29 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'{STATISTICS_GET_TOPIC}/#')
 
 
+state = State(mqtt, on_error)
+
 @mqtt.on_message()
 def on_message(client, userdata, msg):
     req = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
     state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
 
 
+@app.route('/temperature_up')
+def temperature_up():
+    state.process_request(Request.TEMPERATURE_UP)
+    return redirect(url_for('index'))
+
+@app.route('/temperature_down')
+def temperature_down():
+    state.process_request(Request.TEMPERATURE_DOWN)
+    return redirect(url_for('index'))
+    
+
 @app.route('/')
+@app.route('/index')
 def index():
-    return "<p>Hello, World!</p>"
-
-
-state = State(mqtt, on_error)
-
+    return render_template('index.html', temperature = state.temperature)
 
 @app.route('/power/<string:kind>')
 def power_on(kind):
