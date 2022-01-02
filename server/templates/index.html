@@ -13,8 +13,15 @@
 	</style>
 </head>
 <body>
+		{% if error_msg is defined and error_msg != None %}
+			<p>{{error_msg}}</p>
+		{% endif %}
 		<a href="/temperature_up">+</a>
 		<a href="/temperature_down">-</a>
 		<p>Temperature value: {{ temperature }}</p>
+		<br><br>
+		<a href="/water_temperature_up">+</a>
+		<a href="/water_temperature_down">-</a>
+		<p>Water temperature value: {{ water}}</p>
 </body>
 </html>

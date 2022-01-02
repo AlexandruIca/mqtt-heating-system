@@ -26,6 +26,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 state = State(mqtt, on_error)
+error_message = ''
 
 @mqtt.on_message()
 def on_message(client, userdata, msg):
@@ -35,19 +36,33 @@ def on_message(client, userdata, msg):
 
 @app.route('/temperature_up')
 def temperature_up():
-    state.process_request(Request.TEMPERATURE_UP)
+    global error_message
+    error_message = state.process_request(Request.TEMPERATURE_UP)
     return redirect(url_for('index'))
 
 @app.route('/temperature_down')
 def temperature_down():
-    state.process_request(Request.TEMPERATURE_DOWN)
+    global error_message
+    error_message = state.process_request(Request.TEMPERATURE_DOWN)
     return redirect(url_for('index'))
-    
+
+@app.route('/water_temperature_up')
+def water_temperature_up():
+    global error_message
+    error_message = state.process_request(Request.WATER_TEMPERATURE_UP)
+    return redirect(url_for('index'))
+
+@app.route('/water_temperature_down')
+def water_temperature_down():
+    global error_message
+    error_message = state.process_request(Request.WATER_TEMPERATURE_DOWN)
+    return redirect(url_for('index'))    
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', temperature = state.temperature)
+    global error_message
+    return render_template('index.html', temperature = state.temperature, water = state.water_temperature, error_msg = error_message)
 
 @app.route('/power/<string:kind>')
 def power_on(kind):

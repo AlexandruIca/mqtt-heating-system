@@ -38,12 +38,14 @@ def on_change_temperature_request(state, f, sign, how_much):
         if state.temperature + how_much > 30:
             state.client.publish(
                 f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "High Temperature Reached")
+            return "High temperature reached"
         else:
             state.temperature += how_much
     elif sign == '-':
         if state.temperature - how_much < 18:
             state.client.publish(
                 f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "Minimum Temperature Reached")
+            return "Minimum temperature reached"
         else:
             state.temperature -= how_much
     f()
@@ -146,4 +148,4 @@ class State:
         self.gas_usage = [5, 6, 7, 8]
 
     def process_request(self, req: Request, callback=default_callback, payload=None):
-        request_map[req](self, payload, callback)
+        return request_map[req](self, payload, callback)
