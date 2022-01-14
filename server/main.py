@@ -12,8 +12,8 @@ app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
 
-def on_error(topic, payload):
-    print("on_error called in main!!! Something went wrong!")
+def on_error(payload):
+    print(f"`on_error` called in main!!! Something went wrong: {payload}")
 
 
 @mqtt.on_connect()

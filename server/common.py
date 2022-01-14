@@ -86,7 +86,7 @@ request_map = {
     Request.POWER_OFF: lambda state, _, f: on_power_request(state, False, f),
     Request.TEMPERATURE_UP: lambda state, _, f: on_change_temperature_request(state, f, '+', 0.5),
     Request.TEMPERATURE_DOWN: lambda state, _, f: on_change_temperature_request(state, f, '-', 0.5),
-    Request.WARNING: lambda state, payload, f: state.on_error(topic, payload),
+    Request.WARNING: lambda state, payload, f: state.on_error(payload),
     Request.WATER_TEMPERATURE_UP: lambda state, _, f: on_change_water_temperature_request(state, f, '+', .5),
     Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', .5),
     Request.WATER_STATISTICS: lambda state, _, f: on_statistics(state, f, 'water'),
