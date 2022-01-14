@@ -13,15 +13,44 @@
 	</style>
 </head>
 <body>
+        <script>
+            function f() {
+                console.log('Whatever')
+            }
+
+            function sendTempUp() {
+                fetch(`/temperature_up`, {method: 'POST'})
+                    .then(x => x.json())
+                    .then(x => console.log(x));
+            }
+
+            function sendTempDown() {
+                fetch(`/temperature_down`, {method: 'POST'})
+                    .then(x => x.json())
+                    .then(x => console.log(x));
+            }
+
+            function sendWaterTempUp() {
+                fetch(`/water_temperature_up`, {method: 'POST'})
+                    .then(x => x.json())
+                    .then(x => console.log(x));
+            }
+
+            function sendWaterTempDown() {
+                fetch(`/water_temperature_down`, {method: 'POST'})
+                    .then(x => x.json())
+                    .then(x => console.log(x));
+            }
+        </script>
 		{% if error_msg is defined and error_msg != None %}
 			<p>{{error_msg}}</p>
 		{% endif %}
-		<a href="/temperature_up">+</a>
-		<a href="/temperature_down">-</a>
+        <button onClick="sendTempUp()">+</button>
+        <button onClick="sendTempDown()">-</button>
 		<p>Temperature value: {{ temperature }}</p>
 		<br><br>
-		<a href="/water_temperature_up">+</a>
-		<a href="/water_temperature_down">-</a>
+		<button onClick="sendWaterTempUp()">+</button>
+		<button onClick="sendWaterTempDown()">-</button>
 		<p>Water temperature value: {{ water}}</p>
 </body>
 </html>
