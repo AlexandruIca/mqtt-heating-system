@@ -1,7 +1,8 @@
 from enum import Enum
 
-HOST: str = 'localhost'
+HOST: str = '127.0.0.1'
 PORT: int = 1883
+FLASK_PORT: int = 5000
 KEEPALIVE: int = 60
 
 POWER_TOPIC: str = 'power'
@@ -53,9 +54,19 @@ def on_change_temperature_request(state, f, sign, how_much):
 
 def on_change_water_temperature_request(state, f, sign, how_much):
     if sign == '+':
-        state.water_temperature += how_much
+        if state.water_temperature + how_much > 90:
+            state.client.publish(
+                f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "High Water Temperature Reached")
+            return "High water temperature reached"
+        else:
+            state.water_temperature += how_much
     elif sign == '-':
-        state.water_temperature -= how_much
+        if state.water_temperature - how_much < 20:
+            state.client.publish(
+                f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "Low Water Temperature Reached")
+            return "Low water temperature reached"
+        else:
+            state.water_temperature -= how_much
     f()
 
 
@@ -77,7 +88,7 @@ request_map = {
     Request.TEMPERATURE_DOWN: lambda state, _, f: on_change_temperature_request(state, f, '-', 0.5),
     Request.WARNING: lambda state, payload, f: state.on_error(topic, payload),
     Request.WATER_TEMPERATURE_UP: lambda state, _, f: on_change_water_temperature_request(state, f, '+', .5),
-    Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', -.5),
+    Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', .5),
     Request.WATER_STATISTICS: lambda state, _, f: on_statistics(state, f, 'water'),
     Request.GAS_STATISTICS: lambda state, _, f: on_statistics(state, f, 'gas'),
 }
