@@ -1,6 +1,6 @@
 #import paho.mqtt.client as mqtt
 from common import *
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, send_from_directory
 from flask_mqtt import Mqtt
 
 
@@ -32,7 +32,6 @@ error_message = ''
 def on_message(client, userdata, msg):
     req = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
     state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
-
 
 @app.route('/temperature_up')
 def temperature_up():
