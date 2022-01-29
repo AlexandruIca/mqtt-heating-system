@@ -14,6 +14,7 @@ STATISTICS_GET_TOPIC: str = 'statistics_get'
 STATISTICS_SET_TOPIC: str = 'statistics_set'
 WATER_USAGE_SUBTOPIC: str = 'water'
 GAS_USAGE_SUBTOPIC: str = 'gas'
+SCHEDULE_TEMP_TOPIC: str = 'schedule_temp'
 
 
 class Request(Enum):
@@ -27,6 +28,7 @@ class Request(Enum):
     WATER_TEMPERATURE_DOWN = 7
     WATER_STATISTICS = 8
     GAS_STATISTICS = 9
+    SCHEDULE_TEMP = 10
 
 
 def on_power_request(state, status, f):
@@ -79,6 +81,41 @@ def on_statistics(state, f, stat_type):
             f'{STATISTICS_SET_TOPIC}/{GAS_USAGE_SUBTOPIC}', str(state.gas_usage))
     f()
 
+def on_schedule_request(state, f, payload):
+    if int(payload['start_hour']) < 0 or  int(payload['start_hour']) > 23 or int(payload['stop_hour']) < 0 or int(payload['stop_hour']) > 23:
+        state.client.publish(
+            f'{WARNINGS_TOPIC}', "Invalid hour scheduling")
+        return "Invalid hour scheduling"
+    if int(payload['scheduled_temp']) > 30:
+        state.client.publish(
+            f'{WARNINGS_TOPIC}', "High Temperature Requested")
+        return "High temperature requested"
+
+    if int(payload['scheduled_temp']) < 18:
+        state.client.publish(
+            f'{WARNINGS_TOPIC}', "Minimum Temperature Requested")
+        return "Minimum temperature requested"
+
+
+
+    new_intervals_for_day = []
+    for interval in state.schedule[payload['day']]:
+        if interval[0] <= int(payload['start_hour']) <= interval[1] and interval[1] <= int(payload['stop_hour']):
+            new_intervals_for_day.append([interval[0], int(payload['start_hour']), interval[2]])
+            new_intervals_for_day.append([int(payload['start_hour']), interval[1], int(payload['scheduled_temp'])])
+        elif interval[0] <= int(payload['stop_hour']) <= interval[1] and interval[0] >= int(payload['start_hour']):
+            new_intervals_for_day.append([interval[0], int(payload['stop_hour']), int(payload['scheduled_temp'])])
+            new_intervals_for_day.append([int(payload['stop_hour']), interval[1], interval[2]])
+        elif interval[0] <= int(payload['start_hour']) <= interval[1] and interval[0] <= int(payload['stop_hour']) <= interval[1]:
+            new_intervals_for_day.append([[interval[0], int(payload['start_hour']), interval[2]]])
+            new_intervals_for_day.append([int(payload['start_hour']), int(payload['stop_hour']), int(payload['scheduled_temp'])])
+            new_intervals_for_day.append([int(payload['stop_hour']), interval[1], interval[2]])
+        else:
+            new_intervals_for_day.append(interval)
+
+    state.schedule[payload['day']] = new_intervals_for_day
+    f()
+
 
 request_map = {
     Request.INVALID: lambda _1, _2, f: f(),
@@ -91,6 +128,7 @@ request_map = {
     Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', .5),
     Request.WATER_STATISTICS: lambda state, _, f: on_statistics(state, f, 'water'),
     Request.GAS_STATISTICS: lambda state, _, f: on_statistics(state, f, 'gas'),
+    Request.SCHEDULE_TEMP: lambda state, payload, f: on_schedule_request(state, f, payload)
 }
 
 
@@ -118,6 +156,8 @@ def payload_to_request(topic: str, payload: str):
         return Request.WATER_STATISTICS
     elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}'):
         return Request.GAS_STATISTICS
+    elif topic == SCHEDULE_TEMP:
+        return Request.SCHEDULE_TEMP
     else:
         return Request.INVALID
 
@@ -141,6 +181,8 @@ def request_to_payload(req: Request, payload=None):
         return (f'{STATISTICS_GET_TOPIC}/{WATER_USAGE_SUBTOPIC}', payload)
     elif req == Request.GAS_STATISTICS:
         return (f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}', payload)
+    elif req == Request.SCHEDULE_TEMP:
+        return (SCHEDULE_TEMP_TOPIC)
 
 
 def default_callback():
@@ -157,6 +199,16 @@ class State:
         # cata apa a consumat in ultimele x luni
         self.water_usage = [10, 50, 32, 24]
         self.gas_usage = [5, 6, 7, 8]
+
+        self.schedule = {
+            "mon": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+            "tue": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+            "wed": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+            "thu": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+            "fri": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+            "sat": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+            "sun": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
+        }
 
     def process_request(self, req: Request, callback=default_callback, payload=None):
         return request_map[req](self, payload, callback)

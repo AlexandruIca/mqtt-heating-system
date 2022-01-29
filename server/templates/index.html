@@ -41,6 +41,21 @@
                     .then(x => x.json())
                     .then(x => console.log(x));
             }
+
+            function setTempSchedule() {
+                var data = {
+                    day: document.getElementById('days').value,
+                    start_hour: document.getElementById('start_hour').value,
+                    stop_hour: document.getElementById('stop_hour').value,
+                    scheduled_temp: document.getElementById('scheduled_temp').value,
+                };
+
+                // console.log(JSON.stringify(data));
+                
+                fetch(`/schedule_temp`, {method: 'POST', body: JSON.stringify(data)});
+            }
+
+
         </script>
 		{% if error_msg is defined and error_msg != None %}
 			<p>{{error_msg}}</p>
@@ -51,6 +66,36 @@
 		<br><br>
 		<button onClick="sendWaterTempUp()">+</button>
 		<button onClick="sendWaterTempDown()">-</button>
-		<p>Water temperature value: {{ water}}</p>
+		<p>Water temperature value: {{ water }}</p>
+        <br><br>
+        <p>Set heating schedule:</p>
+
+        <div>
+            <p>Current Schedule: {{ schedule }}</p>
+        </div>
+        <div class="wrap">
+            <label for="days">Choose day of the week:</label>
+
+            <select name="days" id="days">
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+                <option value="sat">Saturday</option>
+                <option value="sun">Sunday</option>
+            </select>
+
+            <label for="start_hour">Start at:</label>
+            <input name="start_hour" id="start_hour" type="text">
+
+            <label for="stop_hour">Stop at:</label>
+            <input name="stop_hour" id="stop_hour" type="text">
+
+            <label for="scheduled_temp">Temperature:</label>
+            <input name="scheduled_temp" id="scheduled_temp" type="text">
+
+            <button onClick="setTempSchedule()">Set</button>
+        </div>
 </body>
 </html>
