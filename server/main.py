@@ -3,7 +3,6 @@ from common import *
 from flask import Flask, redirect, url_for, render_template, send_from_directory
 from flask_mqtt import Mqtt
 
-
 app = Flask(__name__)
 app.config['MQTT_BROKER_URL'] = HOST
 app.config['MQTT_BROKER_PORT'] = PORT
@@ -11,6 +10,8 @@ app.config['MQTT_KEEPALIVE'] = KEEPALIVE
 app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
+generate_temp_water_values('temperature_usage.txt', 1, 2022, 18, 30)
+generate_temp_water_values('water_temperature_usage.txt', 1, 2022, 20, 90)
 
 def on_error(payload):
     print(f"`on_error` called in main!!! Something went wrong: {payload}")
@@ -82,6 +83,17 @@ def power_on(kind):
     req = Request.POWER_ON if kind == 'on' else Request.POWER_OFF
     state.process_request(req, callback=lambda: print('Power on from HTTP!'))
     return f"<p>Powered {kind}: {state.powered_on}</p>"
+
+
+@app.route('/temperature_usage')
+def temperature_usage():
+    temp_usage = state.temperature_usage
+    return f"<p> Medium heat temperature used in {temp_usage[1]} is: {round(sum(temp_usage[0]) / len(temp_usage[0]))}</p>"
+
+@app.route('/water_temperature_usage')
+def water_temperature_usage():
+    water_temp_usage = state.water_temperature_usage
+    return f"<p> Medium water temperature used in {water_temp_usage[1]} is: {round(sum(water_temp_usage[0]) / len(water_temp_usage[0]))}</p>"
 
 
 app.run()

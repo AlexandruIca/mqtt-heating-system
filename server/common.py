@@ -1,9 +1,11 @@
 from enum import Enum
+import random, datetime, calendar
 
 HOST: str = '127.0.0.1'
 PORT: int = 1883
 FLASK_PORT: int = 5000
 KEEPALIVE: int = 60
+SEEDS = {calendar.month_name[i]: i ** 5 for i in range(1, 13)}
 
 POWER_TOPIC: str = 'power'
 TEMP_TOPIC: str = 'temperature'
@@ -147,6 +149,25 @@ def default_callback():
     pass
 
 
+def generate_temp_water_values(file_name, month, year, minimum, maximum):
+    num_days = calendar.monthrange(year, month)[1]
+    #print(SEEDS[calendar.month_name[datetime.date.today().month]])
+    random.seed(SEEDS[calendar.month_name[datetime.date.today().month]])
+    with open(file_name, 'w') as f:
+        for i in range(num_days):
+            f.write(str(random.randint(minimum, maximum)) + "\n")
+
+def read_temp_water_values(file_name):
+    common = []
+    with open(file_name) as f:
+        line = f.readline()
+        common.append(int(line))
+        while line:
+            line = f.readline()
+            if line != '':
+                common.append(int(line))
+    return (common, calendar.month_name[datetime.date.today().month])
+
 class State:
     def __init__(self, client, on_error):
         self.powered_on = False
@@ -154,9 +175,8 @@ class State:
         self.water_temperature = 20
         self.client = client
         self.on_error = on_error
-        # cata apa a consumat in ultimele x luni
-        self.water_usage = [10, 50, 32, 24]
-        self.gas_usage = [5, 6, 7, 8]
+        self.temperature_usage = read_temp_water_values('temperature_usage.txt')
+        self.water_temperature_usage = read_temp_water_values('water_temperature_usage.txt')
 
     def process_request(self, req: Request, callback=default_callback, payload=None):
         return request_map[req](self, payload, callback)

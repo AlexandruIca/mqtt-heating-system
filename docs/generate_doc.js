@@ -58,7 +58,7 @@ const port = process.env.PORT || 5000
  * @swagger
  * /statistics/water_temperature:
  * post:
- *        description:   returns an array 
+ *        description:  returns an array 
  *        responses:
  *         '200':
  *                description: Successful response
