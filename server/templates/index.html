@@ -35,7 +35,7 @@
 	</style>
     <script>
         async function post(path, id) {
-            const res = await fetch(`/temperature_up`, {method: 'POST'})
+            const res = await fetch(path, {method: 'POST'})
             document.getElementById(id).innerHTML = await res.json()
         }
     </script>
@@ -51,9 +51,9 @@
             <button onClick="post('/temperature_up', 'temp')">+</button>
         </div>
         <div class="holder">
-            <button onClick="post('/water_temperature_down', 'temp')">-</button>
+            <button onClick="post('/water_temperature_down', 'wtemp')">-</button>
             <p>Water temperature value: <span id="wtemp">{{ water }}</span></p>
-            <button onClick="post('/water_temperature_up', 'temp')">+</button>
+            <button onClick="post('/water_temperature_up', 'wtemp')">+</button>
         </div>
     </div>
 </body>
