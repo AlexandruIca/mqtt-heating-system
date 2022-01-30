@@ -35,6 +35,10 @@ def on_message(client, userdata, msg):
     state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
 
 
+@app.route('/docs')
+def docs():
+    return redirect('/static/index.html')
+
 @app.route('/temperature_up', methods=['POST'])
 def temperature_up():
     global error_message
