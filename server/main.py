@@ -12,8 +12,8 @@ app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
 
-def on_error(topic, payload):
-    print("on_error called in main!!! Something went wrong!")
+def on_error(payload):
+    print(f"`on_error` called in main!!! Something went wrong: {payload}")
 
 
 @mqtt.on_connect()
@@ -28,40 +28,47 @@ def on_connect(client, userdata, flags, rc):
 state = State(mqtt, on_error)
 error_message = ''
 
+
 @mqtt.on_message()
 def on_message(client, userdata, msg):
     req = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
     state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
 
-@app.route('/temperature_up')
+
+@app.route('/temperature_up', methods=['POST'])
 def temperature_up():
     global error_message
     error_message = state.process_request(Request.TEMPERATURE_UP)
-    return redirect(url_for('index'))
+    return str(state.temperature)
 
-@app.route('/temperature_down')
+
+@app.route('/temperature_down', methods=['POST'])
 def temperature_down():
     global error_message
     error_message = state.process_request(Request.TEMPERATURE_DOWN)
-    return redirect(url_for('index'))
+    return str(state.temperature)
 
-@app.route('/water_temperature_up')
+
+@app.route('/water_temperature_up', methods=['POST'])
 def water_temperature_up():
     global error_message
     error_message = state.process_request(Request.WATER_TEMPERATURE_UP)
-    return redirect(url_for('index'))
+    return str(state.water_temperature)
 
-@app.route('/water_temperature_down')
+
+@app.route('/water_temperature_down', methods=['POST'])
 def water_temperature_down():
     global error_message
     error_message = state.process_request(Request.WATER_TEMPERATURE_DOWN)
-    return redirect(url_for('index'))    
+    return str(state.water_temperature)
+
 
 @app.route('/')
 @app.route('/index')
 def index():
     global error_message
-    return render_template('index.html', temperature = state.temperature, water = state.water_temperature, error_msg = error_message)
+    return render_template('index.html', temperature=state.temperature, water=state.water_temperature, error_msg=error_message, HOST=HOST, PORT=FLASK_PORT)
+
 
 @app.route('/power/<string:kind>')
 def power_on(kind):

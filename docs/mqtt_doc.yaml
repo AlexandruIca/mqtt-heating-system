@@ -1,11 +1,98 @@
 asyncapi: 2.2.0
 info:
   title: Heating system
-  version: '0.1.0'
+  version: 1.0.0
+  description:  It helps people to be always connected to their heating system.
+  license:
+    name: The Four
+servers:
+  production:
+    url: http://localhost:5000
+    description: A simple MQTT client for our heating system
+    protocol: mqtt
 channels:
-  hello:
+  temperature/temperature_up:
+    subscribe:
+      message:
+        description: An event describing addition of an unit to the normal heating temperature
+        payload:
+          type: object
+          properties:
+            temperature:
+              type: integer
+              minimum: 18
+              maximum: 30
     publish:
       message:
+        description: An event describing addition of an unit to the normal heating temperature
         payload:
-          type: string
-          pattern: '^hello .+$'
+          type: object
+          properties:
+            temperature:
+              type: integer
+              minimum: 18
+              maximum: 30
+  temperature/temperature_down:
+    subscribe:
+      message:
+        description: An event describing substraction of an unit to the normal heating temperature
+        payload:
+          type: object
+          properties:
+            temperature:
+              type: integer
+              minimum: 18
+              maximum: 30
+    publish:
+      message:
+        description: An event describing substraction of an unit to the normal heating temperature
+        payload:
+          type: object
+          properties:
+            temperature:
+              type: integer
+              minimum: 18
+              maximum: 30          
+  water_temperature/water_temperature_up:
+      subscribe:
+        message:
+          description: Adds an unit to the water temperature
+          payload:
+            type: object
+            properties:
+              water_temperature:
+                type: integer
+                minimum: 20
+                maximum: 90
+      publish:
+        message:
+          description: Adds an unit to the water temperature
+          payload:
+            type: object
+            properties:
+              water_temperature:
+                type: integer
+                minimum: 20
+                maximum: 90
+  water_temperature/water_temperature_down:
+      subscribe:
+        message:
+          description: Substract an unit to the water temperature
+          payload:
+            type: object
+            properties:
+              water_temperature:
+                type: integer
+                minimum: 20
+                maximum: 90
+      publish:
+        message:
+          description: Substract an unit to the water temperature
+          payload:
+            type: object
+            properties:
+              water_temperature:
+                type: integer
+                minimum: 20
+                maximum: 90
+          

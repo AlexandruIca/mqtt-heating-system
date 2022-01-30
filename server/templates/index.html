@@ -1,27 +1,76 @@
 <html lang="en">
 <head>
-    <title>Document</title>
+    <title>Heating system</title>
 	<style>
-		a {
-			font-size: 50px;
-			text-decoration: none;
-			border: 1px solid black;
-			border-radius: 25px;
-			color: white;
-			background-color: black;
-		}
+        :root {
+            --background: lightgray;
+            --highlight: darkgray;
+            font-size: 20px;
+        }
+        body {
+            margin: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            background: var(--background);}
+        #container {
+            width: 50%;
+            margin: auto;}
+            .holder {
+                display: flex;
+                justify-content: space-between;
+                margin: 2rem auto;}
+                p {margin: auto;}
+                button {
+                    font-size: 1rem;
+                    width: 2em;
+                    height: 2em;
+                    background: transparent;
+                    border: 1px solid black;
+                    border-radius: 100%;
+                    transition-property: background-color;
+                    transition-duration: .5s;}
+                button:hover { background: var(--highlight); }
 	</style>
+    <script>
+        function sendTempUp() {
+            fetch(`/temperature_up`, {method: 'POST'})
+                .then(x => x.json())
+                .then(x => console.log(x));
+        }
+        function sendTempDown() {
+            fetch(`/temperature_down`, {method: 'POST'})
+                .then(x => x.json())
+                .then(x => console.log(x));
+        }
+        function sendWaterTempUp() {
+            fetch(`/water_temperature_up`, {method: 'POST'})
+                .then(x => x.json())
+                .then(x => console.log(x));
+        }
+        function sendWaterTempDown() {
+            fetch(`/water_temperature_down`, {method: 'POST'})
+                .then(x => x.json())
+                .then(x => console.log(x));
+        }
+    </script>
 </head>
 <body>
-		{% if error_msg is defined and error_msg != None %}
-			<p>{{error_msg}}</p>
-		{% endif %}
-		<a href="/temperature_up">+</a>
-		<a href="/temperature_down">-</a>
-		<p>Temperature value: {{ temperature }}</p>
-		<br><br>
-		<a href="/water_temperature_up">+</a>
-		<a href="/water_temperature_down">-</a>
-		<p>Water temperature value: {{ water}}</p>
+    <div id="container">
+        {% if error_msg is defined and error_msg != None %}
+            <p>{{error_msg}}</p>
+        {% endif %}
+        <div class="holder">
+            <button onClick="sendTempDown()">-</button>
+            <p>Temperature value: {{ temperature }}</p>
+            <button onClick="sendTempUp()">+</button>
+        </div>
+        <div class="holder">
+            <button onClick="sendWaterTempDown()">-</button>
+            <p>Water temperature value: {{ water }}</p>
+            <button onClick="sendWaterTempUp()">+</button>
+        </div>
+    </div>
 </body>
 </html>
