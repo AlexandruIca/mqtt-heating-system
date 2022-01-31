@@ -15,6 +15,11 @@ mqtt = Mqtt(app)
 def on_error(payload):
     print(f"`on_error` called in main!!! Something went wrong: {payload}")
 
+def jsonify(value, error):
+    if error:
+        return '{"value": "' + str(value) + '", "error": "' + str(error) + '"}'
+    return '{"value": "' + str(value) + '"}'
+
 
 @mqtt.on_connect()
 def on_connect(client, userdata, flags, rc):
@@ -42,29 +47,33 @@ def docs():
 @app.route('/temperature_up', methods=['POST'])
 def temperature_up():
     global error_message
-    error_message = state.process_request(Request.TEMPERATURE_UP)
-    return str(state.temperature)
+    err = state.process_request(Request.TEMPERATURE_UP)
+    error_message = err
+    return jsonify(state.temperature, err)
 
 
 @app.route('/temperature_down', methods=['POST'])
 def temperature_down():
     global error_message
-    error_message = state.process_request(Request.TEMPERATURE_DOWN)
-    return str(state.temperature)
+    err = state.process_request(Request.TEMPERATURE_DOWN)
+    error_message = err
+    return jsonify(state.temperature, err)
 
 
 @app.route('/water_temperature_up', methods=['POST'])
 def water_temperature_up():
     global error_message
-    error_message = state.process_request(Request.WATER_TEMPERATURE_UP)
-    return str(state.water_temperature)
+    err = state.process_request(Request.WATER_TEMPERATURE_UP)
+    error_message = err
+    return jsonify(state.water_temperature, err)
 
 
 @app.route('/water_temperature_down', methods=['POST'])
 def water_temperature_down():
     global error_message
-    error_message = state.process_request(Request.WATER_TEMPERATURE_DOWN)
-    return str(state.water_temperature)
+    err = state.process_request(Request.WATER_TEMPERATURE_DOWN)
+    error_message = err
+    return jsonify(state.water_temperature, err)
 
 
 @app.route('/')
