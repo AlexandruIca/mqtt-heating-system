@@ -49,10 +49,10 @@
                     stop_hour: document.getElementById('stop_hour').value,
                     scheduled_temp: document.getElementById('scheduled_temp').value,
                 };
-
-                // console.log(JSON.stringify(data));
                 
-                fetch(`/schedule_temp`, {method: 'POST', body: JSON.stringify(data)});
+                fetch(`/schedule_temp`, {method: 'POST', body: JSON.stringify(data)})
+                    .then(x => x.json())
+                    .then(x =>  console.log(x));
             }
 
 

@@ -1,4 +1,5 @@
 from enum import Enum
+import json
 
 HOST: str = '127.0.0.1'
 PORT: int = 1883
@@ -82,38 +83,40 @@ def on_statistics(state, f, stat_type):
     f()
 
 def on_schedule_request(state, f, payload):
-    if int(payload['start_hour']) < 0 or  int(payload['start_hour']) > 23 or int(payload['stop_hour']) < 0 or int(payload['stop_hour']) > 23:
+    parsedPayload = json.loads(payload)
+    if int(parsedPayload['start_hour']) < 0 or  int(parsedPayload['start_hour']) > 23 or int(parsedPayload['stop_hour']) < 0 or int(parsedPayload['stop_hour']) > 23:
         state.client.publish(
             f'{WARNINGS_TOPIC}', "Invalid hour scheduling")
         return "Invalid hour scheduling"
-    if int(payload['scheduled_temp']) > 30:
+    if int(parsedPayload['scheduled_temp']) > 30:
         state.client.publish(
             f'{WARNINGS_TOPIC}', "High Temperature Requested")
         return "High temperature requested"
 
-    if int(payload['scheduled_temp']) < 18:
+    if int(parsedPayload['scheduled_temp']) < 18:
         state.client.publish(
             f'{WARNINGS_TOPIC}', "Minimum Temperature Requested")
         return "Minimum temperature requested"
 
 
-
     new_intervals_for_day = []
-    for interval in state.schedule[payload['day']]:
-        if interval[0] <= int(payload['start_hour']) <= interval[1] and interval[1] <= int(payload['stop_hour']):
-            new_intervals_for_day.append([interval[0], int(payload['start_hour']), interval[2]])
-            new_intervals_for_day.append([int(payload['start_hour']), interval[1], int(payload['scheduled_temp'])])
-        elif interval[0] <= int(payload['stop_hour']) <= interval[1] and interval[0] >= int(payload['start_hour']):
-            new_intervals_for_day.append([interval[0], int(payload['stop_hour']), int(payload['scheduled_temp'])])
-            new_intervals_for_day.append([int(payload['stop_hour']), interval[1], interval[2]])
-        elif interval[0] <= int(payload['start_hour']) <= interval[1] and interval[0] <= int(payload['stop_hour']) <= interval[1]:
-            new_intervals_for_day.append([[interval[0], int(payload['start_hour']), interval[2]]])
-            new_intervals_for_day.append([int(payload['start_hour']), int(payload['stop_hour']), int(payload['scheduled_temp'])])
-            new_intervals_for_day.append([int(payload['stop_hour']), interval[1], interval[2]])
+    for interval in state.schedule[parsedPayload['day']]:
+        # print(interval[1] <= int(payload['stop_hour']))
+        if interval[0] <= int(parsedPayload['start_hour']) <= interval[1] and interval[1] <= int(parsedPayload['stop_hour']):
+            new_intervals_for_day.append([interval[0], int(parsedPayload['start_hour']), interval[2]])
+            new_intervals_for_day.append([int(parsedPayload['start_hour']), interval[1], int(parsedPayload['scheduled_temp'])])
+        elif interval[0] <= int(parsedPayload['stop_hour']) <= interval[1] and interval[0] >= int(parsedPayload['start_hour']):
+            new_intervals_for_day.append([interval[0], int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
+            new_intervals_for_day.append([int(parsedPayload['stop_hour']), interval[1], interval[2]])
+        elif interval[0] <= int(parsedPayload['start_hour']) <= interval[1] and interval[0] <= int(parsedPayload['stop_hour']) <= interval[1]:
+            new_intervals_for_day.append([interval[0], int(parsedPayload['start_hour']), interval[2]])
+            new_intervals_for_day.append([int(parsedPayload['start_hour']), int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
+            new_intervals_for_day.append([int(parsedPayload['stop_hour']), interval[1], interval[2]])
         else:
             new_intervals_for_day.append(interval)
 
-    state.schedule[payload['day']] = new_intervals_for_day
+    # print(new_intervals_for_day)
+    state.schedule[parsedPayload['day']] = new_intervals_for_day
     f()
 
 
@@ -135,31 +138,31 @@ request_map = {
 def payload_to_request(topic: str, payload: str):
     if topic == POWER_TOPIC:
         if payload == 'on':
-            return Request.POWER_ON
+            return (Request.POWER_ON,)
         elif payload == 'off':
-            return Request.POWER_OFF
+            return (Request.POWER_OFF,)
         else:
-            return Request.INVALID
+            return (Request.INVALID,)
     elif topic.startswith(TEMP_TOPIC):
         if payload == 'up':
-            return Request.TEMPERATURE_UP
+            return (Request.TEMPERATURE_UP,)
         elif payload == 'down':
-            return Request.TEMPERATURE_DOWN
+            return (Request.TEMPERATURE_DOWN,)
     elif topic.startswith(WARNINGS_TOPIC):
-        return Request.WARNING
+        return (Request.WARNING,)
     elif topic == WATER_TEMP_TOPIC:
         if payload == 'up':
-            return Request.WATER_TEMPERATURE_UP
+            return (Request.WATER_TEMPERATURE_UP,)
         elif payload == 'down':
-            return Request.WATER_TEMPERATURE_DOWN
+            return (Request.WATER_TEMPERATURE_DOWN,)
     elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{WATER_USAGE_SUBTOPIC}'):
-        return Request.WATER_STATISTICS
+        return (Request.WATER_STATISTICS,)
     elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}'):
-        return Request.GAS_STATISTICS
-    elif topic == SCHEDULE_TEMP:
-        return Request.SCHEDULE_TEMP
+        return (Request.GAS_STATISTICS,)
+    elif topic == SCHEDULE_TEMP_TOPIC:
+        return (Request.SCHEDULE_TEMP, payload)
     else:
-        return Request.INVALID
+        return (Request.INVALID,)
 
 
 def request_to_payload(req: Request, payload=None):
@@ -182,7 +185,7 @@ def request_to_payload(req: Request, payload=None):
     elif req == Request.GAS_STATISTICS:
         return (f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}', payload)
     elif req == Request.SCHEDULE_TEMP:
-        return (SCHEDULE_TEMP_TOPIC)
+        return (SCHEDULE_TEMP_TOPIC, payload)
 
 
 def default_callback():
