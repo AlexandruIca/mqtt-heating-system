@@ -19,8 +19,8 @@ def on_error(payload):
 
 def jsonify(msg_type, value, error):
     if error:
-        return '{"type": "' + msg_type + '", "value": "' + str(value) + '", "error": "' + str(error) + '"}'
-    return '{"type": "' + msg_type + '", "value": "' + str(value) + '"}'
+        return json.dumps({"type": msg_type, "value": value, "error": error})
+    return json.dumps({"type": msg_type, "value": value})
 
 
 @mqtt.on_connect()
@@ -101,15 +101,15 @@ def power_on(kind):
     return f"<p>Powered {kind}: {state.powered_on}</p>"
 
 
-@app.route('/temperature_usage')
+@app.route('/temperature_usage', methods=['POST'])
 def temperature_usage():
     temp_usage = state.temperature_usage
-    return f"<p> Medium heat temperature used in {temp_usage[1]} is: {round(sum(temp_usage[0]) / len(temp_usage[0]))}</p>"
+    return jsonify("statistics", {"month": temp_usage[1], "average_usage": round(sum(temp_usage[0]) / len(temp_usage[0]))}, "")
 
-@app.route('/water_temperature_usage')
+@app.route('/water_temperature_usage', methods=['POST'])
 def water_temperature_usage():
     water_temp_usage = state.water_temperature_usage
-    return f"<p> Medium water temperature used in {water_temp_usage[1]} is: {round(sum(water_temp_usage[0]) / len(water_temp_usage[0]))}</p>"
+    return jsonify("statistics", {"month": water_temp_usage[1], "average_usage": round(sum(water_temp_usage[0]) / len(water_temp_usage[0]))}, "")
 
 
 app.run()
