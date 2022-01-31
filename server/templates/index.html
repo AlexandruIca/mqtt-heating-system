@@ -37,14 +37,15 @@
                 text-align: center;}
 	</style>
     <script>
-        async function post(path, id) {
-            const res = await fetch(path, {method: 'POST'})
+        async function post(path, id, payload) {
+            const res = await fetch(path, {method: 'POST', body: payload})
             const json = await res.json()
             console.log(json)
             if(json.error)
                 document.getElementById('error').innerHTML = json.error
             else
                 document.getElementById('error').innerHTML = ""
+            
             document.getElementById(id).innerHTML = json.value
         }
 
@@ -56,9 +57,7 @@
                 scheduled_temp: document.getElementById('scheduled_temp').value,
             };
                 
-            fetch(`/schedule_temp`, {method: 'POST', body: JSON.stringify(data)})
-                .then(x => x.json())
-                .then(x =>  console.log(x));
+            post(`/schedule_temp`, 'schedule', JSON.stringify(data));
         }
     </script>
 </head>
@@ -76,7 +75,7 @@
         </div>
 
         <div>
-            <p>Current Schedule: {{ schedule }}</p>
+            <p>Current Schedule: <span id="schedule"> {{ schedule }} </span></p>
         </div>
         <div class="wrap">
             <label for="days">Choose day of the week:</label>
