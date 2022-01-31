@@ -47,6 +47,19 @@
                 document.getElementById('error').innerHTML = ""
             document.getElementById(id).innerHTML = json.value
         }
+
+        function setTempSchedule() {
+            var data = {
+                day: document.getElementById('days').value,
+                start_hour: document.getElementById('start_hour').value,
+                stop_hour: document.getElementById('stop_hour').value,
+                scheduled_temp: document.getElementById('scheduled_temp').value,
+            };
+
+            // console.log(JSON.stringify(data));
+            
+            fetch(`/schedule_temp`, {method: 'POST', body: JSON.stringify(data)});
+        }
     </script>
 </head>
 <body>
@@ -61,6 +74,36 @@
             <p>Water temperature value: <span id="wtemp">{{ water }}</span></p>
             <button onClick="post('/water_temperature_up', 'wtemp')">+</button>
         </div>
+
+        <div>
+            <p>Current Schedule: {{ schedule }}</p>
+        </div>
+        <div class="wrap">
+            <label for="days">Choose day of the week:</label>
+
+            <select name="days" id="days">
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+                <option value="sat">Saturday</option>
+                <option value="sun">Sunday</option>
+            </select>
+
+            <label for="start_hour">Start at:</label>
+            <input name="start_hour" id="start_hour" type="text">
+
+            <label for="stop_hour">Stop at:</label>
+            <input name="stop_hour" id="stop_hour" type="text">
+
+            <label for="scheduled_temp">Temperature:</label>
+            <input name="scheduled_temp" id="scheduled_temp" type="text">
+
+            <button onClick="setTempSchedule()">Set</button>
+        </div>
+
         <p id="error"></p>
     </div>
+
 </body>

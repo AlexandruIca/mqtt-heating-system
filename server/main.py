@@ -1,7 +1,8 @@
 #import paho.mqtt.client as mqtt
 from common import *
-from flask import Flask, redirect, url_for, render_template, send_from_directory
+from flask import Flask, redirect, url_for, render_template, request, send_from_directory
 from flask_mqtt import Mqtt
+import json
 
 app = Flask(__name__)
 app.config['MQTT_BROKER_URL'] = HOST
@@ -76,12 +77,21 @@ def water_temperature_down():
     error_message = err
     return jsonify(state.water_temperature, err)
 
+def default_callback():
+    pass
+
+@app.route('/schedule_temp', methods=['POST'])
+def schedule_temp():
+    global error_message
+    error_message = state.process_request(Request.SCHEDULE_TEMP, default_callback, json.loads(request.data))
+    return str(state.schedule)
+
 
 @app.route('/')
 @app.route('/index')
 def index():
     global error_message
-    return render_template('index.html', temperature=state.temperature, water=state.water_temperature, error_msg=error_message, HOST=HOST, PORT=FLASK_PORT)
+    return render_template('index.html', temperature=state.temperature, water=state.water_temperature, schedule=state.schedule, error_msg=error_message, HOST=HOST, PORT=FLASK_PORT)
 
 
 @app.route('/power/<string:kind>')
