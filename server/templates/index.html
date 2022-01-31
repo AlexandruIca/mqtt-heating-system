@@ -32,19 +32,25 @@
                     transition-property: background-color;
                     transition-duration: .5s;}
                 button:hover { background: var(--highlight); }
+            #error {
+                color: red;
+                text-align: center;}
 	</style>
     <script>
         async function post(path, id) {
             const res = await fetch(path, {method: 'POST'})
-            document.getElementById(id).innerHTML = await res.json()
+            const json = await res.json()
+            console.log(json)
+            if(json.error)
+                document.getElementById('error').innerHTML = json.error
+            else
+                document.getElementById('error').innerHTML = ""
+            document.getElementById(id).innerHTML = json.value
         }
     </script>
 </head>
 <body>
     <div id="container">
-        {% if error_msg is defined and error_msg != None %}
-            <p>{{error_msg}}</p>
-        {% endif %}
         <div class="holder">
             <button onClick="post('/temperature_down', 'temp')">-</button>
             <p>Temperature value: <span id="temp">{{ temperature }}</span></p>
@@ -55,5 +61,6 @@
             <p>Water temperature value: <span id="wtemp">{{ water }}</span></p>
             <button onClick="post('/water_temperature_up', 'wtemp')">+</button>
         </div>
+        <p id="error"></p>
     </div>
 </body>
