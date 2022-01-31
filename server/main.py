@@ -30,6 +30,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'{TEMP_TOPIC}/#')
     client.subscribe(f'{WATER_TEMP_TOPIC}/#')
     client.subscribe(f'{STATISTICS_GET_TOPIC}/#')
+    client.subscribe(f'{SCHEDULE_TEMP_TOPIC}/#')
 
 
 state = State(mqtt, on_error)
@@ -38,8 +39,8 @@ error_message = ''
 
 @mqtt.on_message()
 def on_message(client, userdata, msg):
-    req = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
-    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'))
+    (req, payload) = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
+    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'), payload=payload)
 
 
 @app.route('/docs')
@@ -83,8 +84,8 @@ def default_callback():
 @app.route('/schedule_temp', methods=['POST'])
 def schedule_temp():
     global error_message
-    error_message = state.process_request(Request.SCHEDULE_TEMP, default_callback, json.loads(request.data))
-    return str(state.schedule)
+    error_message = state.process_request(Request.SCHEDULE_TEMP, default_callback, request.data)
+    return state.schedule
 
 
 @app.route('/')
