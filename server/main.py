@@ -39,8 +39,8 @@ error_message = ''
 
 @mqtt.on_message()
 def on_message(client, userdata, msg):
-    (req, payload) = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
-    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'), payload=payload)
+    (req, req_payload) = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
+    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'), payload=req_payload)
 
 
 @app.route('/docs')

@@ -13,7 +13,6 @@ def on_connect(client, userdata, flags, rc):
         "scheduled_temp":"25"
     }
     (topic, payload) = request_to_payload(Request.SCHEDULE_TEMP, payload=json.dumps(test_payload))
-    print(payload)
     client.publish(topic, payload)
 
 
