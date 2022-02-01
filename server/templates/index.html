@@ -49,6 +49,8 @@
         async function post(path, id, payload) {
             const res = await fetch(path, {method: 'POST', body: payload});
             const json = await res.json();
+
+            console.log(json)
          
             if(json.error) {
                 document.getElementById('error').innerHTML = json.error;
@@ -56,7 +58,11 @@
                 document.getElementById('error').innerHTML = "";
             }
             
-            document.getElementById(id).innerHTML = json.value;
+            if(json.type === 'schedule') {
+                document.getElementById(id).innerHTML = JSON.stringify(json.value);
+            } else {
+                document.getElementById(id).innerHTML = json.value;
+            }
         }
 
         function setTempSchedule() {
