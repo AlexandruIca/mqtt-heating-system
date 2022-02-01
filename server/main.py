@@ -11,8 +11,8 @@ app.config['MQTT_KEEPALIVE'] = KEEPALIVE
 app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
-generate_temp_water_values('temperature_usage.txt', 1, 2022, 18, 30)
-generate_temp_water_values('water_temperature_usage.txt', 1, 2022, 20, 90)
+generate_temp_water_values('temperature_usage.txt', datetime.date.today().month, datetime.date.today().year, 18, 30)
+generate_temp_water_values('water_temperature_usage.txt', datetime.date.today().month, datetime.date.today().year, 20, 90)
 
 def on_error(payload):
     print(f"`on_error` called in main!!! Something went wrong: {payload}")
