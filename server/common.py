@@ -87,6 +87,32 @@ def on_statistics(state, f, stat_type):
             f'{STATISTICS_SET_TOPIC}/{GAS_USAGE_SUBTOPIC}', str(state.gas_usage))
     f()
 
+def change_schedule(day_schedule, new_interval):
+    print(day_schedule)
+    schedule = dict((hour, i[2]) for hour in range(0, 24) for i in day_schedule if (i[0] <= hour < i[1]) or (i[1] == 0 and i[0] <= hour))
+
+    for hour in range(new_interval[0], new_interval[1]):
+        schedule[hour] = new_interval[2]
+
+    new_schedule = []
+    aux_interval = []
+    print(schedule)
+    for key in schedule:
+        if aux_interval == []:
+            aux_interval = [key, key+1, schedule[key]]
+        elif aux_interval[1] <= key and aux_interval[2] == schedule[key]:
+            aux_interval[1] = key 
+        else:
+            aux_interval[1] = aux_interval[1] + 1
+            new_schedule.append(aux_interval)
+            aux_interval = [key, key, schedule[key]]
+
+    aux_interval[1] = 0        
+    new_schedule.append(aux_interval)
+    print(new_schedule)
+    return new_schedule
+    
+
 def on_schedule_request(state, f, payload):
     parsedPayload = json.loads(payload)
     if int(parsedPayload['start_hour']) < 0 or  int(parsedPayload['start_hour']) > 23 or int(parsedPayload['stop_hour']) < 0 or int(parsedPayload['stop_hour']) > 23:
@@ -103,23 +129,7 @@ def on_schedule_request(state, f, payload):
             f'{WARNINGS_TOPIC}', "Minimum Temperature Requested")
         return "Minimum temperature requested"
 
-
-    new_intervals_for_day = []
-    for interval in state.schedule[parsedPayload['day']]:
-        if interval[0] <= int(parsedPayload['start_hour']) <= interval[1] and interval[1] <= int(parsedPayload['stop_hour']):
-            new_intervals_for_day.append([interval[0], int(parsedPayload['start_hour']), interval[2]])
-            new_intervals_for_day.append([int(parsedPayload['start_hour']), interval[1], int(parsedPayload['scheduled_temp'])])
-        elif interval[0] <= int(parsedPayload['stop_hour']) <= interval[1] and interval[0] >= int(parsedPayload['start_hour']):
-            new_intervals_for_day.append([interval[0], int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
-            new_intervals_for_day.append([int(parsedPayload['stop_hour']), interval[1], interval[2]])
-        elif interval[0] <= int(parsedPayload['start_hour']) <= interval[1] and interval[0] <= int(parsedPayload['stop_hour']) <= interval[1]:
-            new_intervals_for_day.append([interval[0], int(parsedPayload['start_hour']), interval[2]])
-            new_intervals_for_day.append([int(parsedPayload['start_hour']), int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
-            new_intervals_for_day.append([int(parsedPayload['stop_hour']), interval[1], interval[2]])
-        else:
-            new_intervals_for_day.append(interval)
-
-    state.schedule[parsedPayload['day']] = new_intervals_for_day
+    state.schedule[parsedPayload['day']] = change_schedule(state.schedule[parsedPayload['day']], [int(parsedPayload['start_hour']), int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
     f()
 
 

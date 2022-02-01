@@ -13,40 +13,56 @@
             display: flex;
             flex-direction: column;
             justify-content: space-around;
-            background: var(--background);}
+            background: var(--background);
+        }
         #container {
             width: 50%;
-            margin: auto;}
-            .holder {
-                display: flex;
-                justify-content: space-between;
-                margin: 2rem auto;}
-                p {margin: auto;}
-                button {
-                    font-size: 1rem;
-                    width: 2em;
-                    height: 2em;
-                    background: transparent;
-                    border: 1px solid black;
-                    border-radius: 100%;
-                    transition-property: background-color;
-                    transition-duration: .5s;}
-                button:hover { background: var(--highlight); }
-            #error {
-                color: red;
-                text-align: center;}
+            margin: auto;
+        }
+        .holder {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem auto;
+        }
+        p {
+            margin: auto;
+        }
+        button {
+            font-size: 1rem;
+            width: 2em;
+            height: 2em;
+            background: transparent;
+            border: 1px solid black;
+            border-radius: 100%;
+            transition-property: background-color;
+            transition-duration: .5s;
+        }
+        button:hover {
+            background: var(--highlight);
+        }
+        #error {
+            color: red;
+            text-align: center;
+        }
 	</style>
     <script>
         async function post(path, id, payload) {
-            const res = await fetch(path, {method: 'POST', body: payload})
-            const json = await res.json()
+            const res = await fetch(path, {method: 'POST', body: payload});
+            const json = await res.json();
+
             console.log(json)
-            if(json.error)
-                document.getElementById('error').innerHTML = json.error
-            else
-                document.getElementById('error').innerHTML = ""
+         
+            if(json.error) {
+                document.getElementById('error').innerHTML = json.error;
+            } else {
+                document.getElementById('error').innerHTML = "";
+            }
             
-            document.getElementById(id).innerHTML = json.value
+            if(json.type === 'schedule') {
+                document.getElementById(id).innerHTML = JSON.stringify(json.value);
+            } else {
+                document.getElementById(id).innerHTML = json.value;
+            }
         }
 
         function setTempSchedule() {
@@ -59,9 +75,16 @@
                 
             post(`/schedule_temp`, 'schedule', JSON.stringify(data));
         }
+
+        function statistics(path, id, msg) {
+            fetch(path, {method: 'POST'})
+                .then(x => x.json())
+                .then(x => document.getElementById(id).innerHTML = `Measured average ${msg} in ${x.value.month} is: ${x.value.average_usage}`);
+        }
+
     </script>
 </head>
-<body>
+<body onload="statistics('/temperature_usage', 'statistics_temp', 'temperature'); statistics('/water_temperature_usage', 'statistics_water', 'water temperature');">
     <div id="container">
         <div class="holder">
             <button onClick="post('/temperature_down', 'temp')">-</button>
@@ -72,6 +95,13 @@
             <button onClick="post('/water_temperature_down', 'wtemp')">-</button>
             <p>Water temperature value: <span id="wtemp">{{ water }}</span></p>
             <button onClick="post('/water_temperature_up', 'wtemp')">+</button>
+        </div>
+
+        <div class="holder">
+            <p id="statistics_temp"></p>
+        </div>
+        <div class="holder">
+            <p id="statistics_water"></p>
         </div>
 
         <div>
