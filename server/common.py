@@ -81,14 +81,13 @@ def on_change_water_temperature_request(state, f, sign, how_much):
 def on_statistics(state, f, stat_type):
     if stat_type == 'water':
         state.client.publish(
-            f'{STATISTICS_SET_TOPIC}/{WATER_USAGE_SUBTOPIC}', str(state.water_usage))
+            f'{STATISTICS_SET_TOPIC}/{WATER_USAGE_SUBTOPIC}', str(state.water_temperature_usage))
     elif stat_type == 'gas':
         state.client.publish(
-            f'{STATISTICS_SET_TOPIC}/{GAS_USAGE_SUBTOPIC}', str(state.gas_usage))
+            f'{STATISTICS_SET_TOPIC}/{GAS_USAGE_SUBTOPIC}', str(state.temperature_usage))
     f()
 
 def change_schedule(day_schedule, new_interval):
-    print(day_schedule)
     schedule = dict((hour, i[2]) for hour in range(0, 24) for i in day_schedule if (i[0] <= hour < i[1]) or (i[1] == 0 and i[0] <= hour))
 
     for hour in range(new_interval[0], new_interval[1]):
@@ -96,7 +95,7 @@ def change_schedule(day_schedule, new_interval):
 
     new_schedule = []
     aux_interval = []
-    print(schedule)
+    
     for key in schedule:
         if aux_interval == []:
             aux_interval = [key, key+1, schedule[key]]
@@ -109,7 +108,7 @@ def change_schedule(day_schedule, new_interval):
 
     aux_interval[1] = 0        
     new_schedule.append(aux_interval)
-    print(new_schedule)
+    
     return new_schedule
     
 
@@ -151,31 +150,31 @@ request_map = {
 def payload_to_request(topic: str, payload: str):
     if topic == POWER_TOPIC:
         if payload == 'on':
-            return (Request.POWER_ON,)
+            return (Request.POWER_ON, None)
         elif payload == 'off':
-            return (Request.POWER_OFF,)
+            return (Request.POWER_OFF, None)
         else:
-            return (Request.INVALID,)
+            return (Request.INVALID, None)
     elif topic.startswith(TEMP_TOPIC):
         if payload == 'up':
-            return (Request.TEMPERATURE_UP,)
+            return (Request.TEMPERATURE_UP, None)
         elif payload == 'down':
-            return (Request.TEMPERATURE_DOWN,)
+            return (Request.TEMPERATURE_DOWN, None)
     elif topic.startswith(WARNINGS_TOPIC):
-        return (Request.WARNING,)
+        return (Request.WARNING, None)
     elif topic == WATER_TEMP_TOPIC:
         if payload == 'up':
-            return (Request.WATER_TEMPERATURE_UP,)
+            return (Request.WATER_TEMPERATURE_UP, None)
         elif payload == 'down':
-            return (Request.WATER_TEMPERATURE_DOWN,)
+            return (Request.WATER_TEMPERATURE_DOWN, None)
     elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{WATER_USAGE_SUBTOPIC}'):
-        return (Request.WATER_STATISTICS,)
+        return (Request.WATER_STATISTICS, None)
     elif topic.startswith(f'{STATISTICS_GET_TOPIC}/{GAS_USAGE_SUBTOPIC}'):
-        return (Request.GAS_STATISTICS,)
+        return (Request.GAS_STATISTICS, None)
     elif topic == SCHEDULE_TEMP_TOPIC:
         return (Request.SCHEDULE_TEMP, payload)
     else:
-        return (Request.INVALID,)
+        return (Request.INVALID, None)
 
 
 def request_to_payload(req: Request, payload=None):
