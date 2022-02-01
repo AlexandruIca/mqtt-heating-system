@@ -11,16 +11,16 @@ app.config['MQTT_KEEPALIVE'] = KEEPALIVE
 app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
-generate_temp_water_values('temperature_usage.txt', datetime.date.today().month, datetime.date.today().year, 18, 30)
-generate_temp_water_values('water_temperature_usage.txt', datetime.date.today().month, datetime.date.today().year, 20, 90)
+generate_temp_water_values('temperature_usage.txt', 1, 2022, MIN_GAS_TEMP, MAX_GAS_TEMP)
+generate_temp_water_values('water_temperature_usage.txt', 1, 2022, MIN_WATER_TEMP, MAX_WATER_TEMP)
 
 def on_error(payload):
     print(f"`on_error` called in main!!! Something went wrong: {payload}")
 
-def jsonify(value, error):
+def jsonify(msg_type, value, error):
     if error:
-        return '{"value": "' + str(value) + '", "error": "' + str(error) + '"}'
-    return '{"value": "' + str(value) + '"}'
+        return '{"type": "' + msg_type + '", "value": "' + str(value) + '", "error": "' + str(error) + '"}'
+    return '{"type": "' + msg_type + '", "value": "' + str(value) + '"}'
 
 
 @mqtt.on_connect()
@@ -50,33 +50,29 @@ def docs():
 @app.route('/temperature_up', methods=['POST'])
 def temperature_up():
     global error_message
-    err = state.process_request(Request.TEMPERATURE_UP)
-    error_message = err
-    return jsonify(state.temperature, err)
+    error_message = state.process_request(Request.TEMPERATURE_UP)
+    return jsonify("number", state.temperature, error_message)
 
 
 @app.route('/temperature_down', methods=['POST'])
 def temperature_down():
     global error_message
-    err = state.process_request(Request.TEMPERATURE_DOWN)
-    error_message = err
-    return jsonify(state.temperature, err)
+    error_message = state.process_request(Request.TEMPERATURE_DOWN)
+    return jsonify("number", state.temperature, error_message)
 
 
 @app.route('/water_temperature_up', methods=['POST'])
 def water_temperature_up():
     global error_message
-    err = state.process_request(Request.WATER_TEMPERATURE_UP)
-    error_message = err
-    return jsonify(state.water_temperature, err)
+    error_message = state.process_request(Request.WATER_TEMPERATURE_UP)
+    return jsonify("number", state.water_temperature, error_message)
 
 
 @app.route('/water_temperature_down', methods=['POST'])
 def water_temperature_down():
     global error_message
-    err = state.process_request(Request.WATER_TEMPERATURE_DOWN)
-    error_message = err
-    return jsonify(state.water_temperature, err)
+    error_message = state.process_request(Request.WATER_TEMPERATURE_DOWN)
+    return jsonify("number", state.water_temperature, error_message)
 
 def default_callback():
     pass
@@ -85,7 +81,7 @@ def default_callback():
 def schedule_temp():
     global error_message
     error_message = state.process_request(Request.SCHEDULE_TEMP, default_callback, request.data)
-    return state.schedule
+    return jsonify("schedule", state.schedule, error_message)
 
 
 @app.route('/')

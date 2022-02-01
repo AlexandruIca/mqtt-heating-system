@@ -6,6 +6,10 @@ PORT: int = 1883
 FLASK_PORT: int = 5000
 KEEPALIVE: int = 60
 SEEDS = {calendar.month_name[i]: i ** 5 for i in range(1, 13)}
+MIN_WATER_TEMP = 20
+MAX_WATER_TEMP = 90
+MIN_GAS_TEMP = 18
+MAX_GAS_TEMP = 30
 
 POWER_TOPIC: str = 'power'
 TEMP_TOPIC: str = 'temperature'
@@ -40,14 +44,14 @@ def on_power_request(state, status, f):
 
 def on_change_temperature_request(state, f, sign, how_much):
     if sign == '+':
-        if state.temperature + how_much > 30:
+        if state.temperature + how_much > MAX_GAS_TEMP:
             state.client.publish(
                 f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "High Temperature Reached")
             return "High temperature reached"
         else:
             state.temperature += how_much
     elif sign == '-':
-        if state.temperature - how_much < 18:
+        if state.temperature - how_much < MIN_GAS_TEMP:
             state.client.publish(
                 f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "Minimum Temperature Reached")
             return "Minimum temperature reached"
@@ -58,14 +62,14 @@ def on_change_temperature_request(state, f, sign, how_much):
 
 def on_change_water_temperature_request(state, f, sign, how_much):
     if sign == '+':
-        if state.water_temperature + how_much > 90:
+        if state.water_temperature + how_much > MAX_WATER_TEMP:
             state.client.publish(
                 f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "High Water Temperature Reached")
             return "High water temperature reached"
         else:
             state.water_temperature += how_much
     elif sign == '-':
-        if state.water_temperature - how_much < 20:
+        if state.water_temperature - how_much < MIN_WATER_TEMP:
             state.client.publish(
                 f'{WARNINGS_TOPIC}/{TEMP_WARNINGS_SUBTOPIC}', "Low Water Temperature Reached")
             return "Low water temperature reached"
@@ -89,12 +93,12 @@ def on_schedule_request(state, f, payload):
         state.client.publish(
             f'{WARNINGS_TOPIC}', "Invalid hour scheduling")
         return "Invalid hour scheduling"
-    if int(parsedPayload['scheduled_temp']) > 30:
+    if int(parsedPayload['scheduled_temp']) > MAX_GAS_TEMP:
         state.client.publish(
             f'{WARNINGS_TOPIC}', "High Temperature Requested")
         return "High temperature requested"
 
-    if int(parsedPayload['scheduled_temp']) < 18:
+    if int(parsedPayload['scheduled_temp']) < MIN_GAS_TEMP:
         state.client.publish(
             f'{WARNINGS_TOPIC}', "Minimum Temperature Requested")
         return "Minimum temperature requested"
@@ -102,7 +106,6 @@ def on_schedule_request(state, f, payload):
 
     new_intervals_for_day = []
     for interval in state.schedule[parsedPayload['day']]:
-        # print(interval[1] <= int(payload['stop_hour']))
         if interval[0] <= int(parsedPayload['start_hour']) <= interval[1] and interval[1] <= int(parsedPayload['stop_hour']):
             new_intervals_for_day.append([interval[0], int(parsedPayload['start_hour']), interval[2]])
             new_intervals_for_day.append([int(parsedPayload['start_hour']), interval[1], int(parsedPayload['scheduled_temp'])])
@@ -214,7 +217,7 @@ class State:
     def __init__(self, client, on_error):
         self.powered_on = False
         self.temperature = 20
-        self.water_temperature = 20
+        self.water_temperature = 40
         self.client = client
         self.on_error = on_error
         self.temperature_usage = read_temp_water_values('temperature_usage.txt')
