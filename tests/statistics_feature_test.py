@@ -3,7 +3,7 @@ from common import *
 
 
 def on_connect(client, userdata, flags, rc):
-    print(f'Connected with result: {rc}')    
+    print(f'Connected with result: {rc}')
     client.subscribe(f'{WARNINGS_TOPIC}/#')
     client.subscribe(f'{STATISTICS_SET_TOPIC}/#')
     (topic, payload) = request_to_payload(Request.WATER_STATISTICS)
@@ -14,6 +14,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     print(f'Received PUBLISH: topic={msg.topic}, payload: {msg.payload}')
+
 
 client = mqtt.Client()
 client.on_connect = on_connect

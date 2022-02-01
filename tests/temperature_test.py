@@ -3,8 +3,9 @@ from common import *
 
 i = 0
 
+
 def on_connect(client, userdata, flags, rc):
-    print(f'Connected with result: {rc}')    
+    print(f'Connected with result: {rc}')
     client.subscribe(f'{WARNINGS_TOPIC}/#')
     for i in range(40):
         (topic, payload) = request_to_payload(Request.TEMPERATURE_UP)
@@ -16,8 +17,10 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     global i
-    print(f'Received PUBLISH: topic={msg.topic}, payload: {msg.payload}, counter: {i}')
+    print(
+        f'Received PUBLISH: topic={msg.topic}, payload: {msg.payload}, counter: {i}')
     i += 1
+
 
 client = mqtt.Client()
 client.on_connect = on_connect
