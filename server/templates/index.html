@@ -60,6 +60,8 @@
             
             if(json.type === 'schedule') {
                 document.getElementById(id).innerHTML = JSON.stringify(json.value);
+            } else if (json.type === 'power') {
+                document.getElementById(id).innerHTML = `⏻`;
             } else {
                 document.getElementById(id).innerHTML = json.value;
             }
@@ -82,9 +84,25 @@
                 .then(x => document.getElementById(id).innerHTML = `Measured average ${msg} in ${x.value.month} is: ${x.value.average_usage}`);
         }
 
+        let poweredOn = true;
+        function powerToggle(path, id) {
+            if (poweredOn) {
+                post(`${path}/off`, id);
+                document.getElementById(id).style.backgroundColor = 'white';
+            } else {
+                post(`${path}/on`, id);
+                document.getElementById(id).style.backgroundColor = 'red';
+            }
+
+            poweredOn = !poweredOn;
+        }
+
     </script>
 </head>
 <body onload="statistics('/temperature_usage', 'statistics_temp', 'temperature'); statistics('/water_temperature_usage', 'statistics_water', 'water temperature');">
+    <div class="container" style="display: grid; place-items: center; margin-top: 1rem">
+        <button id="power_button" onClick="powerToggle('/power', 'power_button')" style="background-color: red;">⏻</button>
+    </div>
     <div id="container">
         <div class="holder">
             <button onClick="post('/temperature_down', 'temp')">-</button>

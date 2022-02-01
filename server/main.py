@@ -11,11 +11,15 @@ app.config['MQTT_KEEPALIVE'] = KEEPALIVE
 app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
-generate_temp_water_values('temperature_usage.txt', 1, 2022, MIN_GAS_TEMP, MAX_GAS_TEMP)
-generate_temp_water_values('water_temperature_usage.txt', 1, 2022, MIN_WATER_TEMP, MAX_WATER_TEMP)
+generate_temp_water_values('temperature_usage.txt',
+                           1, 2022, MIN_GAS_TEMP, MAX_GAS_TEMP)
+generate_temp_water_values(
+    'water_temperature_usage.txt', 1, 2022, MIN_WATER_TEMP, MAX_WATER_TEMP)
+
 
 def on_error(payload):
     print(f"`on_error` called in main!!! Something went wrong: {payload}")
+
 
 def jsonify(msg_type, value, error):
     if error:
@@ -39,13 +43,16 @@ error_message = ''
 
 @mqtt.on_message()
 def on_message(client, userdata, msg):
-    (req, req_payload) = payload_to_request(msg.topic, msg.payload.decode('ASCII'))
-    state.process_request(req, lambda: print(f'Event: {msg.topic}, {req}'), payload=req_payload)
+    (req, req_payload) = payload_to_request(
+        msg.topic, msg.payload.decode('ASCII'))
+    state.process_request(req, lambda: print(
+        f'Event: {msg.topic}, {req}'), payload=req_payload)
 
 
 @app.route('/docs')
 def docs():
     return redirect('/static/index.html')
+
 
 @app.route('/temperature_up', methods=['POST'])
 def temperature_up():
@@ -74,13 +81,16 @@ def water_temperature_down():
     error_message = state.process_request(Request.WATER_TEMPERATURE_DOWN)
     return jsonify("number", state.water_temperature, error_message)
 
+
 def default_callback():
     pass
+
 
 @app.route('/schedule_temp', methods=['POST'])
 def schedule_temp():
     global error_message
-    error_message = state.process_request(Request.SCHEDULE_TEMP, default_callback, request.data)
+    error_message = state.process_request(
+        Request.SCHEDULE_TEMP, default_callback, request.data)
     return jsonify("schedule", state.schedule, error_message)
 
 
@@ -91,25 +101,28 @@ def index():
     return render_template('index.html', temperature=state.temperature, water=state.water_temperature, schedule=state.schedule, error_msg=error_message, HOST=HOST, PORT=FLASK_PORT)
 
 
-@app.route('/power/<string:kind>')
+@app.route('/power/<string:kind>', methods=['POST'])
 def power_on(kind):
+    global error_message
     if kind != 'on' and kind != 'off':
-        return "<p>Invalid URL, expected /power/on or /power/off</p>"
+        return "Invalid URL, expected /power/on or /power/off"
 
     req = Request.POWER_ON if kind == 'on' else Request.POWER_OFF
-    state.process_request(req, callback=lambda: print('Power on from HTTP!'))
-    return f"<p>Powered {kind}: {state.powered_on}</p>"
+    error_message = state.process_request(
+        req, callback=lambda: print('Power on from HTTP!'))
+    return jsonify('power', str(state.powered_on), error_message)
 
 
 @app.route('/temperature_usage', methods=['POST'])
 def temperature_usage():
     temp_usage = state.temperature_usage
-    return jsonify("statistics", {"month": temp_usage[1], "average_usage": round(sum(temp_usage[0]) / len(temp_usage[0]))}, "")
+    return jsonify('statistics', {"month": temp_usage[1], "average_usage": round(sum(temp_usage[0]) / len(temp_usage[0]))}, "")
+
 
 @app.route('/water_temperature_usage', methods=['POST'])
 def water_temperature_usage():
     water_temp_usage = state.water_temperature_usage
-    return jsonify("statistics", {"month": water_temp_usage[1], "average_usage": round(sum(water_temp_usage[0]) / len(water_temp_usage[0]))}, "")
+    return jsonify('statistics', {"month": water_temp_usage[1], "average_usage": round(sum(water_temp_usage[0]) / len(water_temp_usage[0]))}, "")
 
 
 app.run()
