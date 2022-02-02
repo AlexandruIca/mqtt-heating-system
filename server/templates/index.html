@@ -12,7 +12,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            /* justify-content: space-around; */
             background: var(--background);
         }
         #container {
@@ -44,8 +44,45 @@
             color: red;
             text-align: center;
         }
+        table {
+            border-collapse: collapse;
+            margin: auto;
+        }
+        table * {
+            text-align: center;
+            border: 1px solid black;
+        }
+        .wrap {
+            display: grid;
+            grid-template-columns: 50% 50%;
+        }
+        #button {
+            display: block;
+            margin: auto;
+            border-radius: 10px;
+            width: auto;
+            padding: 5px 10px;
+        }
 	</style>
     <script>
+        function updateTable(json) {
+            const table = document.getElementById('table')
+            table.innerHTML = '<tr><td>Interval</td><td>temperature</td></tr>'
+            for(let day in json.value) {
+                for(let interval in json.value[day])
+                    table.insertAdjacentHTML('beforeend', `<tr>
+                        <td>${day} (${json.value[day][interval][0]} - ${json.value[day][interval][1]})</td>
+                        <td>${json.value[day][interval][2]}</td></tr>
+                `)
+            }
+        }
+        async function initTable() {
+            const res = await fetch('/schedule_temp', {method: 'POST', body: '{"day":"mon","start_hour":"00","stop_hour":"0","scheduled_temp":"0"}'})
+            const json = await res.json()
+            updateTable(json)
+        }
+        initTable()
+
         async function post(path, id, payload) {
             const res = await fetch(path, {method: 'POST', body: payload});
             const json = await res.json();
@@ -57,7 +94,8 @@
             } else {
                 document.getElementById('error').innerHTML = "";
             }
-            
+            console.log(path, id, payload)
+            console.log(json.value)
             if(json.type === 'schedule') {
                 document.getElementById(id).innerHTML = JSON.stringify(json.value);
             } else if (json.type === 'power') {
@@ -122,9 +160,8 @@
             <p id="statistics_water"></p>
         </div>
 
-        <div>
-            <p>Current Schedule: <span id="schedule"> {{ schedule }} </span></p>
-        </div>
+        <table id="table">
+        </table>
         <div class="wrap">
             <label for="days">Choose day of the week:</label>
 
@@ -146,9 +183,8 @@
 
             <label for="scheduled_temp">Temperature:</label>
             <input name="scheduled_temp" id="scheduled_temp" type="text">
-
-            <button onClick="setTempSchedule()">Set</button>
         </div>
+        <button id="button" onclick="setTempSchedule()">Set</button>
 
         <p id="error"></p>
     </div>
