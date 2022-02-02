@@ -10,6 +10,7 @@ paho-mqtt = ">=1.6.1"
 flask = ">=2.0.0"
 flask-mqtt = ">=.0.0"
 requests = ">=2.27.1"
+apscheduler = ">=3.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

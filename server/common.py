@@ -1,8 +1,6 @@
 from enum import Enum
-import random
-import datetime
-import calendar
-import json
+import random, datetime, calendar, json
+from apscheduler.schedulers.background import BackgroundScheduler
 
 HOST: str = '127.0.0.1'
 PORT: int = 1883
@@ -90,36 +88,34 @@ def on_statistics(state, f, stat_type):
             f'{STATISTICS_SET_TOPIC}/{GAS_USAGE_SUBTOPIC}', str(state.temperature_usage))
     f()
 
-
 def change_schedule(day_schedule, new_interval):
-    schedule = dict((hour, i[2]) for hour in range(0, 24) for i in day_schedule if (
-        i[0] <= hour < i[1]) or (i[1] == 0 and i[0] <= hour))
+    schedule = dict((hour, i[2]) for hour in range(0, 24) for i in day_schedule if (i[0] <= hour < i[1]) or (i[1] == 0 and i[0] <= hour))
 
     for hour in range(new_interval[0], new_interval[1]):
         schedule[hour] = new_interval[2]
 
     new_schedule = []
     aux_interval = []
-
+    
     for key in schedule:
         if aux_interval == []:
             aux_interval = [key, key+1, schedule[key]]
         elif aux_interval[1] <= key and aux_interval[2] == schedule[key]:
-            aux_interval[1] = key
+            aux_interval[1] = key 
         else:
             aux_interval[1] = aux_interval[1] + 1
             new_schedule.append(aux_interval)
             aux_interval = [key, key, schedule[key]]
 
-    aux_interval[1] = 0
+    aux_interval[1] = 0        
     new_schedule.append(aux_interval)
-
+    
     return new_schedule
-
+    
 
 def on_schedule_request(state, f, payload):
     parsedPayload = json.loads(payload)
-    if int(parsedPayload['start_hour']) < 0 or int(parsedPayload['start_hour']) > 23 or int(parsedPayload['stop_hour']) < 0 or int(parsedPayload['stop_hour']) > 23:
+    if int(parsedPayload['start_hour']) < 0 or  int(parsedPayload['start_hour']) > 23 or int(parsedPayload['stop_hour']) < 0 or int(parsedPayload['stop_hour']) > 23:
         state.client.publish(
             f'{WARNINGS_TOPIC}', "Invalid hour scheduling")
         return "Invalid hour scheduling"
@@ -133,8 +129,7 @@ def on_schedule_request(state, f, payload):
             f'{WARNINGS_TOPIC}', "Minimum Temperature Requested")
         return "Minimum temperature requested"
 
-    state.schedule[parsedPayload['day']] = change_schedule(state.schedule[parsedPayload['day']], [int(
-        parsedPayload['start_hour']), int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
+    state.schedule[parsedPayload['day']] = change_schedule(state.schedule[parsedPayload['day']], [int(parsedPayload['start_hour']), int(parsedPayload['stop_hour']), int(parsedPayload['scheduled_temp'])])
     f()
 
 
@@ -149,8 +144,7 @@ request_map = {
     Request.WATER_TEMPERATURE_DOWN: lambda state, _, f: on_change_water_temperature_request(state, f, '-', .5),
     Request.WATER_STATISTICS: lambda state, _, f: on_statistics(state, f, 'water'),
     Request.GAS_STATISTICS: lambda state, _, f: on_statistics(state, f, 'gas'),
-    Request.SCHEDULE_TEMP: lambda state, payload, f: on_schedule_request(
-        state, f, payload)
+    Request.SCHEDULE_TEMP: lambda state, payload, f: on_schedule_request(state, f, payload)
 }
 
 
@@ -218,7 +212,6 @@ def generate_temp_water_values(file_name, month, year, minimum, maximum):
         for i in range(num_days):
             f.write(str(random.randint(minimum, maximum)) + "\n")
 
-
 def read_temp_water_values(file_name):
     common = []
     with open(file_name) as f:
@@ -230,18 +223,15 @@ def read_temp_water_values(file_name):
                 common.append(int(line))
     return (common, calendar.month_name[datetime.date.today().month])
 
-
 class State:
     def __init__(self, client, on_error):
-        self.powered_on = True
+        self.powered_on = False
         self.temperature = 20
         self.water_temperature = 40
         self.client = client
         self.on_error = on_error
-        self.temperature_usage = read_temp_water_values(
-            'temperature_usage.txt')
-        self.water_temperature_usage = read_temp_water_values(
-            'water_temperature_usage.txt')
+        self.temperature_usage = read_temp_water_values('temperature_usage.txt')
+        self.water_temperature_usage = read_temp_water_values('water_temperature_usage.txt')
 
         self.schedule = {
             "mon": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
@@ -253,8 +243,9 @@ class State:
             "sun": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
         }
 
+        self.scheduler = BackgroundScheduler()
+
     def process_request(self, req: Request, callback=default_callback, payload=None):
-        if self.powered_on or (not self.powered_on and req == Request.POWER_ON):
-            return request_map[req](self, payload, callback)
-        else:
-            return "Heating system is not powered on!"
+        return request_map[req](self, payload, callback)
+
+    
