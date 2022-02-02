@@ -11,10 +11,9 @@ app.config['MQTT_KEEPALIVE'] = KEEPALIVE
 app.config['MQTT_TLS_ENABLED'] = False
 mqtt = Mqtt(app)
 
-generate_temp_water_values('temperature_usage.txt',
-                           1, 2022, MIN_GAS_TEMP, MAX_GAS_TEMP)
-generate_temp_water_values(
-    'water_temperature_usage.txt', 1, 2022, MIN_WATER_TEMP, MAX_WATER_TEMP)
+
+generate_temp_water_values('temperature_usage.txt', datetime.date.today().month, datetime.date.today().year, MIN_GAS_TEMP, MAX_GAS_TEMP)
+generate_temp_water_values('water_temperature_usage.txt', datetime.date.today().month, datetime.date.today().year, MIN_WATER_TEMP, MAX_WATER_TEMP)
 
 
 def on_error(payload):
