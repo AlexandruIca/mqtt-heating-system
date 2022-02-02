@@ -1,4 +1,5 @@
 from shared import post_to
+from server.common import *
 
 
 result = None
@@ -15,7 +16,7 @@ for i in range(100):
     output = float(result['value'])
 
 
-assert(output == 90)
+assert(output == MAX_WATER_TEMP)
 
 
 for i in range(200):
@@ -28,4 +29,4 @@ for i in range(200):
     output = float(result['value'])
 
 
-assert(output == 20)
+assert(output == MIN_WATER_TEMP)

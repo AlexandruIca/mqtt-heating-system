@@ -1,4 +1,5 @@
 from shared import post_to
+from server.common import *
 
 
 result = None
@@ -15,7 +16,7 @@ for i in range(100):
     output = float(result['value'])
 
 
-assert(output == 30)
+assert(output == MAX_GAS_TEMP)
 
 
 for i in range(100):
@@ -28,4 +29,4 @@ for i in range(100):
     output = float(result['value'])
 
 
-assert(output == 18)
+assert(output == MIN_GAS_TEMP)
