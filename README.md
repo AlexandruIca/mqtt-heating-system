@@ -1,3 +1,5 @@
+[![CI](https://github.com/AlexandruIca/mqtt-heating-system/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexandruIca/mqtt-heating-system/actions/workflows/ci.yml)
+---
 # MQTT Heating System
 This project exposes an MQTT API that should manage/observe a heating system.
 
