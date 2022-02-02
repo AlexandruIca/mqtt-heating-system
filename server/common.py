@@ -3,6 +3,7 @@ import random
 import datetime
 import calendar
 import json
+from apscheduler.schedulers.background import BackgroundScheduler
 
 HOST: str = '127.0.0.1'
 PORT: int = 1883
@@ -252,6 +253,8 @@ class State:
             "sat": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
             "sun": [[0, 9, 20], [9, 22, 25], [22, 0, 20]],
         }
+
+        self.scheduler = BackgroundScheduler()
 
     def process_request(self, req: Request, callback=default_callback, payload=None):
         if self.powered_on or (not self.powered_on and req == Request.POWER_ON):

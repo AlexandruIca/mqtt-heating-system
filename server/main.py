@@ -1,8 +1,9 @@
-#import paho.mqtt.client as mqtt
+import datetime
 from common import *
 from flask import Flask, redirect, url_for, render_template, request, send_from_directory
 from flask_mqtt import Mqtt
 import json
+import apscheduler
 
 app = Flask(__name__)
 app.config['MQTT_BROKER_URL'] = HOST
@@ -125,4 +126,21 @@ def water_temperature_usage():
     return jsonify('statistics', {"month": water_temp_usage[1], "average_usage": round(sum(water_temp_usage[0]) / len(water_temp_usage[0]))}, "")
 
 
+def background_schedule():
+    week_day = datetime.date.today().weekday()
+    hour = datetime.datetime.now().hour
+
+    days = {0: 'mon', 1: 'tue', 2: 'wed',
+            3: 'thu', 4: 'fri', 5: 'sat', 6: 'sun'}
+    day_schedule = state.schedule[days[week_day]]
+
+    schedule = dict((hour, i[2]) for hour in range(0, 24) for i in day_schedule if (
+        i[0] <= hour < i[1]) or (i[1] == 0 and i[0] <= hour))
+    current_temp = schedule[hour]
+
+    if state.powered_on:
+        state.temperature = current_temp
+
+
+state.scheduler.add_job(background_schedule, 'interval', minutes=1)
 app.run()
