@@ -44,11 +44,12 @@ const port = process.env.PORT || 5000
  *                description: Successful response
  */
 
+
 /**
  * @swagger
- * /statistics/temperature:
+ * /temperature_usage:
  *  post:
- *        description: returns an array which contains information about how much temeprature was consumed   
+ *        description: It makes the arithmetic mean of the temperatures recorded every day of the current month      
  *        responses:
  *         '200':
  *                description: Successful response
@@ -56,13 +57,24 @@ const port = process.env.PORT || 5000
 
 /**
  * @swagger
- * /statistics/water_temperature:
- * post:
- *        description:  returns an array 
+ * /water_temperature_usage:
+ *  post:
+ *        description: It makes the arithmetic mean of the water temperatures recorded every day of the current month   
  *        responses:
  *         '200':
  *                description: Successful response
  */
+ 
+/**
+ * @swagger
+ * /schedule_temp:
+ *  post:
+ *        description: It sets a certain temperature for a certain range 
+ *        responses:
+ *         '200':
+ *                description: Successful response
+ */
+ 
 
 const swaggerOptions = {
     swaggerDefinition: {

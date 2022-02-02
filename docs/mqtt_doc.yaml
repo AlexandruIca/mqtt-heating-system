@@ -95,4 +95,66 @@ channels:
                 type: integer
                 minimum: 20
                 maximum: 90
-          
+  statistics/temperature_usage:
+      subscribe:
+        message:
+          description: It makes the arithmetic mean of the temperatures recorded every day of the current month
+          payload:
+            type: object
+            properties:
+              medium_temperature:
+                type: string
+      publish:  
+        message:
+          description: It makes the arithmetic mean of the temperatures recorded every day of the current month
+          payload:
+            type: object
+            properties:
+              medium_temperature:
+                type: string
+  statistics/water_temperature_usage:
+      subscribe:
+        message:
+          description: It makes the arithmetic mean of the water temperatures recorded every day of the current month
+          payload:
+            type: object
+            properties:
+              medium_water_temperature:
+                type: string
+      publish:  
+        message:
+          description:  It makes the arithmetic mean of the water temperatures recorded every day of the current month
+          payload:
+            type: object
+            properties:
+              medium_water_temperature:
+                type: string
+  schedule_temp:
+      subscribe:
+        message:
+          description: It sets a certain temperature for a certain range
+          payload:
+            type: object
+            properties:
+              day:
+                type: string
+              time_start:
+                type: string
+              ora_stop:
+                type: string
+              temperature:
+                type: string
+      publish:  
+        message:
+          description: It sets a certain temperature for a certain range
+          payload:
+            type: object
+            properties:
+              day:
+                type: string
+              time_start:
+                type: string
+              ora_stop:
+                type: string
+              temperature:
+                type: string 
