@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
 
-TESTS="temperature_tests.py water_temperature_tests.py"
-
-for test in $TESTS
+for test in $(ls -a | grep -i ".*\.py")
 do
     poetry run python3 $test
 

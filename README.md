@@ -39,7 +39,7 @@ Se pot vedea si la issues.
 - Schimbare temperatura caldura 10/10
 - Schimbare temperatura apa 10/10
 - Programare interval 8/10
-- Alerte 8/10
+- Statistici 8/10
 - Control de la distanta 10/10
 
 ## Plot the issues
