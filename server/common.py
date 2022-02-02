@@ -104,7 +104,7 @@ def change_schedule(day_schedule, new_interval):
 
     for key in schedule:
         if aux_interval == []:
-            aux_interval = [key, key+1, schedule[key]]
+            aux_interval = [key, key, schedule[key]]
         elif aux_interval[1] <= key and aux_interval[2] == schedule[key]:
             aux_interval[1] = key
         else:
