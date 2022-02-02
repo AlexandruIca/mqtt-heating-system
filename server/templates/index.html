@@ -86,7 +86,7 @@
         async function post(path, id, payload) {
             const res = await fetch(path, {method: 'POST', body: payload});
             const json = await res.json();
-
+            updateTable(json)
             console.log(json)
          
             if(json.error) {
