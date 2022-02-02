@@ -1,3 +1,4 @@
+import time
 import paho.mqtt.client as mqtt
 from common import *
 
@@ -25,6 +26,8 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect(HOST, PORT, KEEPALIVE)
 
-client.loop_forever()
+client.connect(HOST, PORT, KEEPALIVE)
+client.loop_start()
+time.sleep(1)
+client.loop_stop(force=False)
